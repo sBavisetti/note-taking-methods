@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charting Method — LLM Model Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    .card{max-width:1060px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Table ─── */
+    .table-wrap {
+      overflow-x: auto;
+      padding: 1.75rem 1.75rem 2rem;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: .875rem;
+    }
+    th, td {
+      padding: .7rem .9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+    }
+    thead tr {
+      background: var(--surface-hi);
+    }
+    th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .05em; text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+    th:first-child { color: var(--ghost); border-bottom-color: var(--border); }
+
+    td { color: var(--muted); line-height: 1.6; }
+    td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; font-weight: 600;
+      color: var(--text); white-space: nowrap;
+      background: var(--surface-hi);
+      border-right: 1px solid var(--border);
+    }
+    tr:hover td { background: var(--accent-soft); }
+    tr:hover td:first-child { background: var(--accent-soft); }
+    tr:last-child td { border-bottom: none; }
+
+    /* Rating pills */
+    .r {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem; font-weight: 500;
+      padding: 1px 7px; border-radius: 9999px;
+      border: 1px solid; margin: 1px 2px 1px 0;
+      white-space: nowrap;
+    }
+    .r-hi  { color: #22c55e; background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.25); }
+    .r-mid { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-ring); }
+    .r-lo  { color: var(--ghost); background: transparent; border-color: var(--border); }
+    .r-yes { color: #22c55e; background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.25); }
+    .r-no  { color: #f87171; background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.25); }
+    .r-partial { color: #fb923c; background: rgba(251,146,60,.08); border-color: rgba(251,146,60,.25); }
+
+    .section-head td {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ghost); background: transparent !important;
+      padding: 1.1rem .9rem .3rem;
+      border-bottom: none;
+    }
+
+    .note-bar {
+      background: var(--surface-hi);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.75rem;
+      font-size: .8rem; color: var(--ghost);
+      line-height: 1.7;
+    }
+    .note-bar strong { color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Charting Method</span>
+        <span class="badge badge-neutral">#04</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Model Comparison <span class="dim">— 2025 Landscape</span></h1>
+      <p class="page-subtitle">Major frontier models compared across capability, access, and deployment dimensions</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>GPT-4o <span style="font-weight:400;opacity:.6">(OpenAI)</span></th>
+          <th>Claude 3.5/4 <span style="font-weight:400;opacity:.6">(Anthropic)</span></th>
+          <th>Gemini 1.5 Pro <span style="font-weight:400;opacity:.6">(Google)</span></th>
+          <th>Llama 3.3 70B <span style="font-weight:400;opacity:.6">(Meta)</span></th>
+          <th>Mistral Large <span style="font-weight:400;opacity:.6">(Mistral AI)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="section-head"><td colspan="6">Access &amp; Weights</td></tr>
+        <tr>
+          <td>License</td>
+          <td><span class="r r-no">Closed API</span></td>
+          <td><span class="r r-no">Closed API</span></td>
+          <td><span class="r r-no">Closed API</span></td>
+          <td><span class="r r-yes">Open weights</span></td>
+          <td><span class="r r-yes">Open weights</span></td>
+        </tr>
+        <tr>
+          <td>Commercial use</td>
+          <td>Via API (paid)</td>
+          <td>Via API (paid)</td>
+          <td>Via API (paid)</td>
+          <td><span class="r r-yes">Permissive</span></td>
+          <td><span class="r r-yes">Permissive</span></td>
+        </tr>
+
+        <tr class="section-head"><td colspan="6">Context &amp; Multimodality</td></tr>
+        <tr>
+          <td>Context window</td>
+          <td><span class="r r-mid">128K tokens</span></td>
+          <td><span class="r r-mid">200K tokens</span></td>
+          <td><span class="r r-hi">1M tokens</span></td>
+          <td><span class="r r-lo">128K tokens</span></td>
+          <td><span class="r r-lo">128K tokens</span></td>
+        </tr>
+        <tr>
+          <td>Vision / images</td>
+          <td><span class="r r-yes">Yes</span></td>
+          <td><span class="r r-yes">Yes</span></td>
+          <td><span class="r r-yes">Yes</span></td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-no">No</span></td>
+        </tr>
+        <tr>
+          <td>Audio / speech</td>
+          <td><span class="r r-yes">Yes (native)</span></td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-yes">Yes (native)</span></td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-no">No</span></td>
+        </tr>
+        <tr>
+          <td>Video input</td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-yes">Yes</span></td>
+          <td><span class="r r-no">No</span></td>
+          <td><span class="r r-no">No</span></td>
+        </tr>
+
+        <tr class="section-head"><td colspan="6">Benchmark Performance</td></tr>
+        <tr>
+          <td>MMLU (knowledge)</td>
+          <td><span class="r r-hi">~88%</span></td>
+          <td><span class="r r-hi">~88–90%</span></td>
+          <td><span class="r r-hi">~85%</span></td>
+          <td><span class="r r-mid">~82%</span></td>
+          <td><span class="r r-mid">~81%</span></td>
+        </tr>
+        <tr>
+          <td>HumanEval (code)</td>
+          <td><span class="r r-hi">~90%</span></td>
+          <td><span class="r r-hi">~92%</span></td>
+          <td><span class="r r-mid">~71%</span></td>
+          <td><span class="r r-mid">~72%</span></td>
+          <td><span class="r r-mid">~68%</span></td>
+        </tr>
+        <tr>
+          <td>MATH (reasoning)</td>
+          <td><span class="r r-hi">~76%</span></td>
+          <td><span class="r r-hi">~78%</span></td>
+          <td><span class="r r-mid">~67%</span></td>
+          <td><span class="r r-mid">~58%</span></td>
+          <td><span class="r r-mid">~56%</span></td>
+        </tr>
+
+        <tr class="section-head"><td colspan="6">Strengths &amp; Fit</td></tr>
+        <tr>
+          <td>Primary strength</td>
+          <td>Multimodal, broad capability, tool use</td>
+          <td>Long docs, reasoning, safety, coding</td>
+          <td>Massive context, multimodal, search</td>
+          <td>Self-hosting, privacy, cost at scale</td>
+          <td>Efficiency, European compliance</td>
+        </tr>
+        <tr>
+          <td>Best use case</td>
+          <td>General assistant, agents, vision</td>
+          <td>Long-form analysis, code review, writing</td>
+          <td>Video/audio analysis, enterprise search</td>
+          <td>On-prem RAG, fine-tuning, cost control</td>
+          <td>EU data residency, fast inference</td>
+        </tr>
+        <tr>
+          <td>Safety alignment</td>
+          <td><span class="r r-mid">RLHF</span></td>
+          <td><span class="r r-hi">Constitutional AI</span></td>
+          <td><span class="r r-mid">RLHF</span></td>
+          <td><span class="r r-partial">Community</span></td>
+          <td><span class="r r-partial">Basic</span></td>
+        </tr>
+
+        <tr class="section-head"><td colspan="6">Cost &amp; Inference</td></tr>
+        <tr>
+          <td>Input cost (approx.)</td>
+          <td>$2.50 / 1M tok</td>
+          <td>$3.00 / 1M tok</td>
+          <td>$1.25 / 1M tok</td>
+          <td>Self-hosted ~$0.10</td>
+          <td>$2.00 / 1M tok</td>
+        </tr>
+        <tr>
+          <td>Self-host VRAM req.</td>
+          <td><span class="r r-no">Not available</span></td>
+          <td><span class="r r-no">Not available</span></td>
+          <td><span class="r r-no">Not available</span></td>
+          <td><span class="r r-mid">~40 GB (bf16)</span></td>
+          <td><span class="r r-mid">~48 GB (bf16)</span></td>
+        </tr>
+        <tr>
+          <td>Fine-tuning support</td>
+          <td><span class="r r-partial">Via API</span></td>
+          <td><span class="r r-partial">Limited</span></td>
+          <td><span class="r r-partial">Vertex AI</span></td>
+          <td><span class="r r-hi">Full (LoRA/QLoRA)</span></td>
+          <td><span class="r r-hi">Full (LoRA/QLoRA)</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-bar">
+    <strong>Notes:</strong> Benchmarks vary by test date and version; treat as rough order-of-magnitude comparisons. Cost figures reflect mid-2025 API pricing and change frequently.
+    For on-device inference, quantized variants (Q4, Q8) halve VRAM requirements at some quality cost. Context windows shown are maximum advertised; effective performance degrades in the 50–80% range.
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

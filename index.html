@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Notes — 10 Methods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7; --surface:#ffffff; --surface-hi:#f4f4f1;
+      --border:#e4e4e7; --text:#18181b; --muted:#52525b;
+      --ghost:#a1a1aa; --accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08); --accent-ring:rgba(14,165,233,.22);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.08);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b; --surface:#131316; --surface-hi:#1c1c20;
+      --border:#27272a; --text:#f4f4f5; --muted:#a1a1aa;
+      --ghost:#52525b; --accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08); --accent-ring:rgba(56,189,248,.22);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.6);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:'Inter',system-ui,sans-serif;
+      line-height:1.65;min-height:100vh;
+      padding:3rem 1.25rem 5rem;
+      transition:background .2s ease,color .2s ease;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+
+    .site-header {
+      max-width:980px; margin:0 auto 2.5rem;
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:1rem; flex-wrap:wrap;
+    }
+    .site-title {
+      font-size:2rem; font-weight:700; letter-spacing:-.03em;
+      color:var(--text); line-height:1.1;
+    }
+    .site-title span { color:var(--accent); }
+    .site-sub {
+      font-size:.9rem; color:var(--muted); margin-top:.4rem; line-height:1.6;
+    }
+    .badge {
+      font-family:'JetBrains Mono',monospace; font-size:.63rem; font-weight:500;
+      letter-spacing:.08em; text-transform:uppercase;
+      padding:2px 9px; border-radius:9999px; border:1px solid;
+    }
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .theme-btn{
+      width:34px; height:34px; border-radius:.5rem;
+      border:1px solid var(--border); background:transparent;
+      color:var(--muted); font-size:1rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:border-color .15s ease,color .15s ease;
+    }
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+    .grid {
+      max-width:980px; margin:0 auto;
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+      gap:1rem;
+    }
+
+    .method-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-top:2px solid var(--accent);
+      border-radius:.75rem;
+      box-shadow:var(--shadow-md);
+      padding:1.4rem 1.5rem 1.6rem;
+      text-decoration:none;
+      display:flex; flex-direction:column; gap:.5rem;
+      transition:box-shadow .2s ease, border-color .15s ease, transform .15s ease;
+      position:relative; overflow:hidden;
+    }
+    .method-card:hover {
+      box-shadow:var(--shadow-lg);
+      transform:translateY(-2px);
+    }
+    .method-card:active { transform:translateY(0); }
+
+    .card-num {
+      font-family:'JetBrains Mono',monospace; font-size:.63rem; font-weight:500;
+      letter-spacing:.08em; text-transform:uppercase;
+      color:var(--accent); background:var(--accent-soft);
+      border:1px solid var(--accent-ring);
+      padding:2px 9px; border-radius:.375rem;
+      display:inline-block; width:fit-content; margin-bottom:.2rem;
+    }
+    .card-method {
+      font-size:1.05rem; font-weight:700; letter-spacing:-.015em;
+      color:var(--text); line-height:1.2;
+    }
+    .card-topic {
+      font-family:'JetBrains Mono',monospace; font-size:.72rem;
+      color:var(--accent); margin-top:.1rem;
+    }
+    .card-desc {
+      font-size:.85rem; color:var(--muted); line-height:1.6; margin-top:.2rem; flex:1;
+    }
+    .card-bestfor {
+      margin-top:.6rem; padding-top:.6rem;
+      border-top:1px solid var(--border);
+      font-size:.75rem; color:var(--ghost);
+    }
+    .card-bestfor strong { color:var(--muted); font-weight:500; }
+    .card-arrow {
+      position:absolute; bottom:1.4rem; right:1.5rem;
+      font-family:'JetBrains Mono',monospace; font-size:.8rem;
+      color:var(--ghost); transition:color .15s ease, transform .15s ease;
+    }
+    .method-card:hover .card-arrow { color:var(--accent); transform:translateX(3px); }
+
+    .divider {
+      max-width:980px; margin:2.5rem auto 1.2rem;
+      border:none; border-top:1px solid var(--border);
+    }
+    .section-label {
+      max-width:980px; margin:0 auto 1rem;
+      font-family:'JetBrains Mono',monospace; font-size:.68rem;
+      font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--ghost);
+    }
+    .bonus-grid {
+      max-width:980px; margin:0 auto;
+    }
+    .bonus-card {
+      background:var(--surface-hi);
+      border:1px solid var(--border);
+      border-radius:.75rem;
+      padding:1rem 1.5rem;
+      text-decoration:none;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:1rem;
+      transition:border-color .15s ease;
+    }
+    .bonus-card:hover { border-color:var(--accent); }
+    .bonus-card span { font-size:.9rem; color:var(--muted); }
+    .bonus-card strong { color:var(--text); }
+    .bonus-arrow { font-family:'JetBrains Mono',monospace; font-size:.8rem; color:var(--ghost); }
+    .bonus-card:hover .bonus-arrow { color:var(--accent); }
+
+    @media (max-width:600px) {
+      .site-title { font-size:1.5rem; }
+      .grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
+      <span class="badge badge-accent">LLM Notes</span>
+      <span class="badge badge-neutral">10 Methods</span>
+    </div>
+    <h1 class="site-title">Large Language<br><span>Models</span></h1>
+    <p class="site-sub">One topic. Ten note-taking methods. Pick the format that fits how you think.</p>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+    <span id="theme-icon">☀</span>
+  </button>
+</header>
+
+<div class="grid">
+
+  <a class="method-card" href="llm-01-cornell.html">
+    <span class="card-num">#01</span>
+    <div class="card-method">Cornell Method</div>
+    <div class="card-topic">LLM Fundamentals</div>
+    <div class="card-desc">Cue column, main notes, and summary strip. Built-in self-quiz with hide/reveal for active recall.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Structured review, exam prep, lectures</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-02-outline.html">
+    <span class="card-num">#02</span>
+    <div class="card-method">Outline Method</div>
+    <div class="card-topic">LLM Training Pipeline</div>
+    <div class="card-desc">Hierarchical indented structure. Main topics, sub-topics, and details nested for clear logical hierarchy.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Organized material, study guides, textbooks</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-03-mindmap.html">
+    <span class="card-num">#03</span>
+    <div class="card-method">Mind Map</div>
+    <div class="card-topic">The LLM Ecosystem</div>
+    <div class="card-desc">Central idea radiating outward with branches. Visualizes relationships across the entire LLM landscape.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Brainstorming, exploring interconnections</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-04-charting.html">
+    <span class="card-num">#04</span>
+    <div class="card-method">Charting Method</div>
+    <div class="card-topic">Model Comparison</div>
+    <div class="card-desc">Information in rows and columns. Side-by-side comparison of major LLMs across key attributes.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Comparisons, fact-heavy material, review</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-05-sentence.html">
+    <span class="card-num">#05</span>
+    <div class="card-method">Sentence Method</div>
+    <div class="card-topic">Key Facts &amp; Timeline</div>
+    <div class="card-desc">One idea per numbered line. Rapid capture of discrete facts about the history and mechanics of LLMs.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Fast lectures, unstructured material</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-06-boxing.html">
+    <span class="card-num">#06</span>
+    <div class="card-method">Boxing Method</div>
+    <div class="card-topic">LLM Applications</div>
+    <div class="card-desc">Related notes grouped into distinct visual boxes. Use cases organized by domain with clear spatial separation.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Digital notes, topic-based chunking</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-07-zettelkasten.html">
+    <span class="card-num">#07</span>
+    <div class="card-method">Zettelkasten</div>
+    <div class="card-topic">Core Concepts Network</div>
+    <div class="card-desc">Atomic cards, one idea each. IDs, cross-links, and tags build a personal knowledge graph of LLM concepts.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Long-term knowledge, research, synthesis</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-08-flownotes.html">
+    <span class="card-num">#08</span>
+    <div class="card-method">Flow Notes</div>
+    <div class="card-topic">Inference &amp; Sampling</div>
+    <div class="card-desc">Free-form, connected ideas with arrows. Traces a prompt through the full LLM inference pipeline organically.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Deep conceptual understanding, processes</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-09-sq3r.html">
+    <span class="card-num">#09</span>
+    <div class="card-method">SQ3R</div>
+    <div class="card-topic">Prompt Engineering</div>
+    <div class="card-desc">Survey → Question → Read → Recite → Review. A reading-comprehension deep dive into the art of prompting.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Textbook-heavy, dense technical reading</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="method-card" href="llm-10-bulletjournal.html">
+    <span class="card-num">#10</span>
+    <div class="card-method">Bullet Journal</div>
+    <div class="card-topic">Building with LLMs</div>
+    <div class="card-desc">Rapid logging with symbols. A developer's journal through concepts, tasks, and observations when building LLM apps.</div>
+    <div class="card-bestfor"><strong>Best for:</strong> Mixed notes + tasks, personal workflow</div>
+    <span class="card-arrow">→</span>
+  </a>
+
+</div>
+
+<hr class="divider">
+<p class="section-label">Also in this collection</p>
+<div class="bonus-grid">
+  <a class="bonus-card" href="llm-cornell-notes.html">
+    <div>
+      <strong>Cornell Notes — LLM Architecture Overview</strong>
+      <span style="display:block;font-size:.8rem;margin-top:2px;">The original Cornell note this collection grew from</span>
+    </div>
+    <span class="bonus-arrow">→</span>
+  </a>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

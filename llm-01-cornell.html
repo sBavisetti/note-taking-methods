@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cornell Method — LLM Fundamentals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.08);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.6);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    em{font-style:italic;color:var(--ghost)}
+    code{font-family:'JetBrains Mono',monospace;font-size:.8em;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-ring);padding:1px 6px;border-radius:4px;}
+    .card{max-width:980px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+    .body-grid{display:flex;align-items:stretch;}
+    .cue-col{width:255px;flex-shrink:0;padding:1.5rem 1.25rem 2rem 1.75rem;position:relative;}
+    .cue-col::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent 0%,var(--border) 6%,var(--border) 94%,transparent 100%);}
+    .col-label{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-ring);padding:2px 9px;border-radius:.375rem;margin-bottom:1.2rem;}
+    .cue-item{padding:7px 9px;margin-bottom:2px;border-radius:.5rem;cursor:default;transition:background .15s ease;}
+    .cue-item:hover{background:var(--accent-soft);}
+    .cue-kw{display:block;font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:500;color:var(--accent);margin-bottom:2px;}
+    .cue-hint{display:block;font-size:.72rem;color:var(--muted);line-height:1.5;}
+    .tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+    .tag{font-family:'JetBrains Mono',monospace;font-size:.61rem;color:var(--muted);border:1px solid var(--border);padding:1px 8px;border-radius:9999px;transition:border-color .15s ease,color .15s ease;cursor:default;}
+    .tag:hover{border-color:var(--accent);color:var(--accent)}
+    .notes-col{flex:1;min-width:0;padding:1.5rem 2rem 2rem;border-left:1px solid var(--border);}
+    .note-block{border-left:2px solid transparent;padding:.1rem 0 1.35rem 1rem;transition:border-color .15s ease;}
+    .note-block:hover{border-left-color:var(--accent);}
+    .note-block:last-child{padding-bottom:0;}
+    .note-block+.note-block{border-top:1px solid var(--border);padding-top:1.2rem;}
+    .note-h{font-size:.8rem;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:.45rem;display:flex;align-items:center;gap:8px;}
+    .note-body{font-size:.9375rem;color:var(--muted);line-height:1.75;}
+    .note-body+.note-body{margin-top:.4rem;}
+    ul.nl{list-style:none;padding:0;}
+    ul.nl li{position:relative;padding-left:1.1rem;margin-bottom:.3rem;font-size:.9375rem;color:var(--muted);line-height:1.72;}
+    ul.nl li::before{content:'—';position:absolute;left:0;top:.28em;color:var(--accent);font-size:.72rem;line-height:1;}
+    .pill{font-family:'JetBrains Mono',monospace;font-size:.61rem;font-weight:400;color:var(--muted);border:1px solid var(--border);padding:1px 8px;border-radius:9999px;}
+    .summary-section{border-top:1px solid var(--border);background:var(--surface-hi);padding:1.5rem 2rem 2.25rem;}
+    .summary-body{font-size:.9375rem;color:var(--muted);line-height:1.85;max-width:860px;}
+    .quiz-notes .note-block p,.quiz-notes .note-block li,.quiz-notes .note-block code{filter:blur(5px);transition:filter .2s ease;user-select:none;}
+    .quiz-notes .note-block:hover p,.quiz-notes .note-block:hover li,.quiz-notes .note-block:hover code{filter:none;}
+    .quiz-summary .summary-body{filter:blur(5px);transition:filter .2s ease;user-select:none;}
+    .quiz-summary .summary-body:hover{filter:none;}
+    .controls{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap;}
+    .ctrl-btn{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:500;letter-spacing:.03em;padding:7px 16px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:border-color .15s ease,color .15s ease,background .15s ease;}
+    .ctrl-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+    .ctrl-btn:active{transform:translateY(1px)}
+    .ctrl-btn.on{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    @media(max-width:660px){.cue-col{width:145px;}.page-title{font-size:1.3rem;}.meta-col{align-items:flex-start;}.notes-col{padding:1.25rem;}}
+  </style>
+</head>
+<body>
+
+<div id="paper">
+  <div class="card">
+    <header class="page-header">
+      <div>
+        <div class="badge-row">
+          <span class="badge badge-accent">Cornell Method</span>
+          <span class="badge badge-neutral">#01</span>
+          <span class="badge badge-neutral">LLM Notes</span>
+        </div>
+        <h1 class="page-title">LLM Fundamentals <span class="dim">— Core Architecture</span></h1>
+        <p class="page-subtitle">What an LLM is, how it's built, and why it works</p>
+      </div>
+      <div class="meta-col">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme"><span id="theme-icon">☀</span></button>
+        <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+        <a href="index.html" class="back-link">← All Methods</a>
+      </div>
+    </header>
+
+    <div class="body-grid" id="notes-area">
+      <aside class="cue-col">
+        <p class="col-label">Cues &amp; Keywords</p>
+        <div class="cue-item"><span class="cue-kw">What is an LLM?</span><span class="cue-hint">Definition and model family</span></div>
+        <div class="cue-item"><span class="cue-kw">Transformer</span><span class="cue-hint">Why this architecture dominates</span></div>
+        <div class="cue-item"><span class="cue-kw">Tokenization</span><span class="cue-hint">How text becomes numbers</span></div>
+        <div class="cue-item"><span class="cue-kw">Self-Attention</span><span class="cue-hint">Core mechanism formula</span></div>
+        <div class="cue-item"><span class="cue-kw">Pre-training</span><span class="cue-hint">Next-token prediction at scale</span></div>
+        <div class="cue-item"><span class="cue-kw">Fine-tuning</span><span class="cue-hint">SFT → RLHF → DPO</span></div>
+        <div class="cue-item"><span class="cue-kw">Emergent Abilities</span><span class="cue-hint">Why scale unlocks new skills</span></div>
+        <div class="cue-item"><span class="cue-kw">Context Window</span><span class="cue-hint">What limits long-form reasoning?</span></div>
+        <div class="cue-item"><span class="cue-kw">Hallucination</span><span class="cue-hint">Confident but wrong — root cause?</span></div>
+        <div class="cue-item"><span class="cue-kw">Key Trade-offs</span><span class="cue-hint">Capability vs. cost vs. safety</span>
+          <div class="tag-row"><span class="tag">speed</span><span class="tag">accuracy</span><span class="tag">cost</span></div>
+        </div>
+      </aside>
+
+      <section class="notes-col">
+        <p class="col-label">Main Notes</p>
+
+        <div class="note-block">
+          <div class="note-h">What is a Large Language Model?</div>
+          <p class="note-body">An <strong>LLM</strong> is a deep neural network trained on massive text corpora to predict the next token given a sequence of prior tokens. The underlying architecture is the <strong>Transformer</strong> (Vaswani et al., 2017). Parameter counts range from ~7B (edge-deployable) to 1T+ (frontier). The model learns grammar, facts, reasoning patterns, and style purely from the statistical structure of language — no hand-coded rules.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Transformer Architecture</div>
+          <ul class="nl">
+            <li><strong>Input Embedding</strong> — tokens mapped to dense vectors; positional encodings added</li>
+            <li><strong>Multi-Head Self-Attention</strong> — each token attends to every other simultaneously across H parallel heads</li>
+            <li><strong>Feed-Forward Network</strong> — two linear layers with GELU activation applied to each token independently</li>
+            <li><strong>Layer Norm + Residuals</strong> — stabilise training; allows very deep stacks (32–96 layers typical)</li>
+            <li><strong>Output Head</strong> — final hidden state projected to vocabulary distribution via softmax</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Tokenization</div>
+          <p class="note-body"><strong>BPE</strong> (Byte-Pair Encoding) or <strong>SentencePiece</strong> compress text to subword tokens. A 100-word sentence ≈ 130 tokens. Vocabulary size typically 32K–128K. Tokenization explains why LLMs struggle with character-level tasks (counting letters, anagrams) — they never "see" individual characters during training.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Self-Attention <span class="pill">core mechanism</span></div>
+          <p class="note-body">For each token, compute Query, Key, Value projections. Attention weights tell each token how much to "borrow" from every other token's Value.</p>
+          <p class="note-body" style="margin-top:.5rem;"><code>Attn(Q,K,V) = softmax( Q·Kᵀ / √d_k ) · V</code></p>
+          <p class="note-body" style="margin-top:.4rem;">Scaled by <code>√d_k</code> to prevent vanishing gradients in softmax. <em>Causal masking</em> blocks attention to future tokens during generation.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Training Phases</div>
+          <ul class="nl">
+            <li><strong>Pre-training</strong> — self-supervised next-token prediction on trillions of tokens. Encodes world knowledge into weights.</li>
+            <li><strong>Supervised Fine-Tuning (SFT)</strong> — teach the model to follow instructions using curated human-written demonstrations.</li>
+            <li><strong>RLHF</strong> — human raters rank outputs; a reward model is trained on rankings; policy updated via PPO to maximise reward.</li>
+            <li><strong>DPO</strong> — Direct Preference Optimisation; simpler RLHF variant that skips the explicit reward model.</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Scaling Laws &amp; Emergent Abilities</div>
+          <p class="note-body">Loss scales predictably with <strong>compute × data × parameters</strong> (Chinchilla law: optimally scale data and params together). <em>Emergent</em> capabilities — chain-of-thought reasoning, in-context learning, multi-step arithmetic — appear abruptly at certain scale thresholds with no explicit training signal.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Context Window</div>
+          <p class="note-body">Maximum tokens processed in one forward pass. Attention is <code>O(n²)</code> in memory and compute. GPT-3: 4K → GPT-4 Turbo: 128K → Gemini 1.5 Pro: 1M+. Solutions: sparse attention, sliding window, RoPE/ALiBi positional encodings, and state-space models (Mamba) that are <code>O(n)</code>.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Hallucination</div>
+          <p class="note-body">The model generates <em>plausible</em> text, not <em>verified</em> text. It has no ground-truth lookup — it samples from a learned distribution. High confidence ≠ factual accuracy. Key mitigations:</p>
+          <ul class="nl" style="margin-top:.4rem;">
+            <li><strong>RAG</strong> — retrieve and inject real source documents into the prompt</li>
+            <li><strong>Tool use</strong> — call external APIs, databases, calculators at inference time</li>
+            <li><strong>RLHF alignment</strong> — reduce sycophancy and overconfidence during training</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Key Trade-offs</div>
+          <ul class="nl">
+            <li><strong>Capability vs. Cost</strong> — larger models perform better but cost more to run</li>
+            <li><strong>Latency vs. Quality</strong> — streaming smaller models beats waiting for large ones</li>
+            <li><strong>Open vs. Closed</strong> — open weights give control; closed APIs offer convenience</li>
+            <li><strong>Safety vs. Helpfulness</strong> — over-refusal reduces utility; under-refusal raises risk</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="summary-section" id="summary-area">
+      <p class="col-label">Summary</p>
+      <p class="summary-body">Large Language Models are Transformer-based networks trained via self-supervised next-token prediction on internet-scale text. The Transformer's <strong>self-attention</strong> mechanism is the engine — every token attends to every other, capturing long-range dependencies. Pre-training encodes world knowledge; fine-tuning (SFT + RLHF/DPO) aligns behaviour. Scale unlocks <strong>emergent abilities</strong> — reasoning and instruction-following not explicitly trained for. Core limitations — hallucination, bounded context, knowledge cutoff — are addressed through RAG, tool use, and extended context architectures. Understanding these foundations is the prerequisite for using LLMs effectively.</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="btn-notes" onclick="toggle('notes',this)">Quiz: Hide Notes</button>
+    <button class="ctrl-btn" id="btn-summary" onclick="toggle('summary',this)">Quiz: Hide Summary</button>
+    <button class="ctrl-btn" onclick="revealAll()">Reveal All</button>
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+  const zones = {
+    notes:   { el: document.getElementById('notes-area'),   cls: 'quiz-notes'   },
+    summary: { el: document.getElementById('summary-area'), cls: 'quiz-summary' },
+  };
+  function toggle(key, btn) {
+    const { el, cls } = zones[key];
+    btn.classList.toggle('on', el.classList.toggle(cls));
+  }
+  function revealAll() {
+    Object.values(zones).forEach(({ el, cls }) => el.classList.remove(cls));
+    document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('on'));
+  }
+</script>
+</body>
+</html>

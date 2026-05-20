@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cornell Notes — Large Language Models</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────
+       Design tokens — mirrors personalWebsite
+       ───────────────────────────────────────── */
+    :root {
+      --bg:          #fafaf7;
+      --surface:     #ffffff;
+      --surface-hi:  #f4f4f1;
+      --border:      #e4e4e7;
+      --text:        #18181b;
+      --muted:       #52525b;
+      --ghost:       #a1a1aa;
+      --accent:      #0ea5e9;
+      --accent-soft: rgba(14, 165, 233, 0.08);
+      --accent-ring: rgba(14, 165, 233, 0.22);
+      --shadow-sm:   0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:   0 4px 12px rgba(0,0,0,.06);
+      --shadow-lg:   0 12px 32px rgba(0,0,0,.08);
+    }
+
+    [data-theme="dark"] {
+      --bg:          #0a0a0b;
+      --surface:     #131316;
+      --surface-hi:  #1c1c20;
+      --border:      #27272a;
+      --text:        #f4f4f5;
+      --muted:       #a1a1aa;
+      --ghost:       #52525b;
+      --accent:      #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.08);
+      --accent-ring: rgba(56, 189, 248, 0.22);
+      --shadow-sm:   0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:   0 4px 12px rgba(0,0,0,.5);
+      --shadow-lg:   0 12px 32px rgba(0,0,0,.6);
+    }
+
+    /* ─── Reset & base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.65;
+      min-height: 100vh;
+      padding: 3rem 1.25rem 5rem;
+      transition: background 0.2s ease, color 0.2s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    strong { font-weight: 600; color: var(--text); }
+    em     { font-style: italic; color: var(--ghost); }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* ─── Outer card ─── */
+    .card {
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      transition: box-shadow 0.2s ease;
+    }
+
+    /* ─── Page header ─── */
+    .page-header {
+      background: var(--surface-hi);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 9px;
+      border-radius: 9999px;
+      border: 1px solid;
+    }
+
+    .badge-accent  { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-ring); }
+    .badge-neutral { color: var(--muted);  background: transparent;        border-color: var(--border);      }
+
+    .page-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      line-height: 1.15;
+    }
+
+    .page-title .dim { color: var(--ghost); font-weight: 400; font-size: 1.2rem; }
+
+    .page-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* Right meta + toggle */
+    .meta-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .theme-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s ease, color 0.15s ease;
+      margin-bottom: 2px;
+    }
+
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Body: cue | notes ─── */
+    .body-grid { display: flex; align-items: stretch; }
+
+    /* ─── Cue column ─── */
+    .cue-col {
+      width: 255px;
+      flex-shrink: 0;
+      padding: 1.5rem 1.25rem 2rem 1.75rem;
+      position: relative;
+    }
+
+    .cue-col::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 1px; height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--border) 6%,
+        var(--border) 94%,
+        transparent 100%
+      );
+    }
+
+    .col-label {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 2px 9px;
+      border-radius: 0.375rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .cue-item {
+      padding: 7px 9px;
+      margin-bottom: 2px;
+      border-radius: 0.5rem;
+      cursor: default;
+      transition: background 0.15s ease;
+    }
+
+    .cue-item:hover { background: var(--accent-soft); }
+
+    .cue-kw {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .cue-hint {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.61rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 1px 8px;
+      border-radius: 9999px;
+      transition: border-color 0.15s ease, color 0.15s ease;
+      cursor: default;
+    }
+
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Notes column ─── */
+    .notes-col {
+      flex: 1;
+      min-width: 0;
+      padding: 1.5rem 2rem 2rem;
+      border-left: 1px solid var(--border);
+    }
+
+    /* ─── Note block ─── */
+    .note-block {
+      border-left: 2px solid transparent;
+      padding: 0.1rem 0 1.35rem 1rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .note-block:hover { border-left-color: var(--accent); }
+    .note-block:last-child { padding-bottom: 0; }
+
+    .note-block + .note-block {
+      border-top: 1px solid var(--border);
+      padding-top: 1.2rem;
+    }
+
+    .note-h {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .note-body {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .note-body + .note-body { margin-top: 0.4rem; }
+
+    ul.nl { list-style: none; padding: 0; }
+
+    ul.nl li {
+      position: relative;
+      padding-left: 1.1rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.9375rem;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+
+    ul.nl li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      top: 0.28em;
+      color: var(--accent);
+      font-size: 0.72rem;
+      line-height: 1;
+    }
+
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.61rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 1px 8px;
+      border-radius: 9999px;
+    }
+
+    /* ─── Summary ─── */
+    .summary-section {
+      border-top: 1px solid var(--border);
+      background: var(--surface-hi);
+      padding: 1.5rem 2rem 2.25rem;
+    }
+
+    .summary-body {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 860px;
+    }
+
+    /* ─── Quiz blur modes ─── */
+    .quiz-notes .note-block p,
+    .quiz-notes .note-block li,
+    .quiz-notes .note-block code {
+      filter: blur(5px);
+      transition: filter 0.2s ease;
+      user-select: none;
+    }
+
+    .quiz-notes .note-block:hover p,
+    .quiz-notes .note-block:hover li,
+    .quiz-notes .note-block:hover code { filter: none; }
+
+    .quiz-summary .summary-body {
+      filter: blur(5px);
+      transition: filter 0.2s ease;
+      user-select: none;
+    }
+
+    .quiz-summary .summary-body:hover { filter: none; }
+
+    /* ─── Controls ─── */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      padding: 7px 16px;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    }
+
+    .ctrl-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .ctrl-btn:active { transform: translateY(1px); }
+
+    .ctrl-btn.on {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: var(--accent-ring);
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 660px) {
+      .cue-col { width: 145px; }
+      .page-title { font-size: 1.3rem; }
+      .meta-col { align-items: flex-start; }
+      .notes-col { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="paper">
+  <div class="card">
+
+    <!-- ════════════════ HEADER ════════════════ -->
+    <header class="page-header">
+      <div>
+        <div class="badge-row">
+          <span class="badge badge-accent" id="notebook-badge" onclick="openRename()" title="Click to rename" style="cursor:pointer;">My Notebook</span>
+          <span class="badge badge-neutral">#04</span>
+        </div>
+        <h1 class="page-title">
+          Large Language Models
+          <span class="dim"> (LLMs)</span>
+        </h1>
+        <p class="page-subtitle">Artificial Intelligence &mdash; Natural Language Processing</p>
+      </div>
+
+      <div class="meta-col">
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+          <span id="theme-icon">☀</span>
+        </button>
+        <span class="badge badge-neutral" style="padding: 3px 11px;">2026-05-19</span>
+        <span class="badge badge-neutral" style="padding: 3px 11px;">LLM Architecture Overview</span>
+      </div>
+    </header>
+
+    <!-- ════════════════ BODY: CUE | NOTES ════════════════ -->
+    <div class="body-grid" id="notes-area">
+
+      <!-- Cue column -->
+      <aside class="cue-col">
+        <p class="col-label">Cues &amp; Keywords</p>
+
+        <div class="cue-item">
+          <span class="cue-kw">What is an LLM?</span>
+          <span class="cue-hint">Definition &amp; architecture family</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Transformer</span>
+          <span class="cue-hint">Core building block since 2017</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Self-Attention</span>
+          <span class="cue-hint">How does a token "see" context?</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Training Phases</span>
+          <span class="cue-hint">Pre-train → Fine-tune → RLHF</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Scaling Laws</span>
+          <span class="cue-hint">Why does model size matter?</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Context Window</span>
+          <span class="cue-hint">What limits document length?</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Hallucination</span>
+          <span class="cue-hint">Confident but wrong — why?</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">RAG</span>
+          <span class="cue-hint">Retrieval-Augmented Generation</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Prompt Engineering</span>
+          <span class="cue-hint">Zero-shot / Few-shot / CoT</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Limitations</span>
+          <span class="cue-hint">When do LLMs fail?</span>
+        </div>
+        <div class="cue-item">
+          <span class="cue-kw">Notable Models</span>
+          <span class="cue-hint">2024–25 landscape</span>
+          <div class="tag-row">
+            <span class="tag">GPT-4o</span>
+            <span class="tag">Claude 4</span>
+            <span class="tag">Gemini</span>
+            <span class="tag">Llama 3</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Notes column -->
+      <section class="notes-col">
+        <p class="col-label">Main Notes</p>
+
+        <div class="note-block">
+          <div class="note-h">Definition</div>
+          <p class="note-body">A <strong>Large Language Model</strong> is a deep-learning model trained on massive text corpora to understand and generate human-like text. Built on the <strong>Transformer</strong> architecture (Vaswani et al., 2017). Parameters range from billions to trillions.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Key Components</div>
+          <ul class="nl">
+            <li><strong>Tokenizer</strong> — splits raw text into tokens (subwords via BPE or WordPiece)</li>
+            <li><strong>Embeddings</strong> — maps each token to a dense vector in high-dimensional space</li>
+            <li><strong>Transformer Layers</strong> — stacked blocks of multi-head self-attention + feed-forward network</li>
+            <li><strong>Output Head</strong> — projects final hidden state to vocabulary probabilities (softmax)</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Self-Attention <span class="pill">core mechanism</span></div>
+          <p class="note-body">Every token attends to every other token in the context window simultaneously. Multi-head attention runs in parallel across H heads, each learning different relationship patterns.</p>
+          <p class="note-body">Formula: <code>Attention(Q, K, V) = softmax( QKᵀ / √d_k ) · V</code></p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Training Phases</div>
+          <ul class="nl">
+            <li><strong>Pre-training</strong> — next-token prediction on trillions of tokens (self-supervised, no labels)</li>
+            <li><strong>Supervised Fine-tuning (SFT)</strong> — adapt to task-specific labeled instruction data</li>
+            <li><strong>RLHF</strong> — human raters rank outputs; reward model trained; policy updated via PPO</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Scaling Laws &amp; Emergent Abilities</div>
+          <p class="note-body">Performance scales predictably with compute, data, and parameters (Hoffmann et al., Chinchilla). <em>Emergent</em> capabilities — in-context learning, chain-of-thought, arithmetic — appear abruptly beyond certain scale thresholds and were not explicitly trained for.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Context Window</div>
+          <p class="note-body">Maximum tokens processed in a single forward pass. GPT-3: 4K → GPT-4 Turbo: 128K → Gemini 1.5 Pro: 1M+. Larger windows enable document-level reasoning but memory scales quadratically — attention is <code>O(n²)</code>.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Hallucinations</div>
+          <p class="note-body">Models generate confident but factually incorrect text — trained to produce <em>plausible</em> continuations, not verified facts. Common mitigations:</p>
+          <ul class="nl" style="margin-top: 0.4rem;">
+            <li><strong>RAG</strong> — ground responses in retrieved documents</li>
+            <li><strong>Tool use</strong> — call external APIs and databases at inference time</li>
+            <li><strong>Constitutional AI / RLHF</strong> — reduce sycophancy and over-confidence</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Retrieval-Augmented Generation (RAG)</div>
+          <p class="note-body">At inference time: <strong>(1)</strong> embed query → <strong>(2)</strong> retrieve top-k chunks from vector DB → <strong>(3)</strong> inject into prompt → <strong>(4)</strong> generate grounded response. Keeps knowledge current without retraining.</p>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Prompt Engineering</div>
+          <ul class="nl">
+            <li><strong>Zero-shot</strong> — describe task only; rely on pre-trained world knowledge</li>
+            <li><strong>Few-shot</strong> — provide 2–8 worked examples directly in the prompt</li>
+            <li><strong>Chain-of-Thought (CoT)</strong> — "think step by step" unlocks multi-step reasoning</li>
+            <li><strong>System prompts</strong> — persistent instructions shaping model persona and constraints</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Key Limitations</div>
+          <ul class="nl">
+            <li>No persistent memory across sessions without external storage layer</li>
+            <li>Knowledge cutoff date — stale on events beyond training data</li>
+            <li>Highly sensitive to prompt phrasing (brittle, fragile outputs)</li>
+            <li>High inference cost at scale (GPU/TPU hours, significant energy spend)</li>
+            <li>Bias and harmful stereotypes inherited from web-scraped training data</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <div class="note-h">Notable Models (2024–2025)</div>
+          <ul class="nl">
+            <li><strong>GPT-4o</strong> (OpenAI) — multimodal, 128K context, vision + audio</li>
+            <li><strong>Claude 3.5 / 4.x</strong> (Anthropic) — strong reasoning &amp; safety alignment focus</li>
+            <li><strong>Gemini 1.5 Pro</strong> (Google DeepMind) — 1M token context window</li>
+            <li><strong>Llama 3.3 405B</strong> (Meta) — open-weight, permissive commercial license</li>
+            <li><strong>Mistral Large</strong> (Mistral AI) — efficient European open model</li>
+          </ul>
+        </div>
+
+      </section>
+    </div><!-- /.body-grid -->
+
+    <!-- ════════════════ SUMMARY ════════════════ -->
+    <div class="summary-section" id="summary-area">
+      <p class="col-label">Summary</p>
+      <p class="summary-body">
+        Large Language Models are Transformer-based neural networks pre-trained on internet-scale text to predict the next token.
+        Their power derives from <strong>self-attention</strong> — which captures rich contextual relationships across the full input — and
+        from <strong>scale</strong>, where billions of parameters unlock emergent reasoning not explicitly trained for.
+        The standard pipeline is self-supervised pre-training → supervised fine-tuning → RLHF alignment.
+        Core practical concerns include <strong>hallucinations</strong> (mitigated via RAG and tool use), bounded context windows,
+        knowledge cutoffs, and prompt sensitivity. Effective LLM deployment combines the right blend of prompt engineering,
+        fine-tuning, and retrieval augmentation matched to the requirements of the target task.
+      </p>
+    </div>
+
+  </div><!-- /.card -->
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn" id="btn-notes"   onclick="toggle('notes',   this)">Quiz: Hide Notes</button>
+    <button class="ctrl-btn" id="btn-summary" onclick="toggle('summary', this)">Quiz: Hide Summary</button>
+    <button class="ctrl-btn"                  onclick="revealAll()">Reveal All</button>
+  </div>
+</div><!-- /#paper -->
+
+<!-- ════════════════ NOTEBOOK NAME MODAL ════════════════ -->
+<div id="modal-overlay" style="
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+">
+  <div style="
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    padding: 1.75rem 2rem;
+    width: min(420px, calc(100vw - 2.5rem));
+  ">
+    <p style="
+      font-family:'JetBrains Mono',monospace;
+      font-size:.63rem; font-weight:500;
+      letter-spacing:.08em; text-transform:uppercase;
+      color:var(--accent);
+      background:var(--accent-soft);
+      border:1px solid var(--accent-ring);
+      display:inline-block; padding:2px 9px;
+      border-radius:.375rem; margin-bottom:1rem;
+    ">New Notebook</p>
+
+    <h2 style="
+      font-size:1.15rem; font-weight:600;
+      letter-spacing:-.02em; color:var(--text);
+      margin-bottom:.35rem;
+    ">What would you like to call this notebook?</h2>
+
+    <p style="font-size:.83rem; color:var(--muted); margin-bottom:1.25rem; line-height:1.6;">
+      Give it a name that describes what you're studying. You can always rename it later by clicking the badge.
+    </p>
+
+    <input id="notebook-input" type="text"
+      placeholder="e.g. AI Fundamentals, CS 301, Week 4…"
+      maxlength="48"
+      style="
+        width:100%;
+        background:var(--surface-hi);
+        border:1px solid var(--border);
+        border-radius:.5rem;
+        color:var(--text);
+        font-family:'Inter',sans-serif;
+        font-size:.9rem;
+        padding:.6rem .85rem;
+        outline:none;
+        transition:border-color .15s ease;
+        margin-bottom:1rem;
+      "
+      onkeydown="if(event.key==='Enter')confirmName()"
+    />
+
+    <div style="display:flex; justify-content:flex-end; gap:.5rem;">
+      <button onclick="confirmName()" style="
+        font-family:'JetBrains Mono',monospace;
+        font-size:.7rem; font-weight:500;
+        letter-spacing:.03em;
+        padding:.5rem 1.1rem;
+        border-radius:.5rem;
+        border:none;
+        background:var(--accent);
+        color:#fff;
+        cursor:pointer;
+        transition:opacity .15s ease;
+      " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Notebook name ──
+  const STORAGE_KEY = 'cornell-notebook-name';
+  const badge  = document.getElementById('notebook-badge');
+  const modal  = document.getElementById('modal-overlay');
+  const input  = document.getElementById('notebook-input');
+
+  function applyName(name) {
+    badge.textContent = name;
+    document.title = name + ' — Large Language Models';
+    localStorage.setItem(STORAGE_KEY, name);
+    modal.style.display = 'none';
+  }
+
+  function confirmName() {
+    const val = input.value.trim();
+    if (val) applyName(val);
+    else input.focus();
+  }
+
+  function openRename() {
+    input.value = badge.textContent;
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => { input.focus(); input.select(); });
+  }
+
+  // Focus style for input
+  input.addEventListener('focus', () => input.style.borderColor = 'var(--accent)');
+  input.addEventListener('blur',  () => input.style.borderColor = 'var(--border)');
+
+  // Close on backdrop click
+  modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+
+  // Init: load saved name or show modal
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    applyName(saved);
+  } else {
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => input.focus());
+  }
+
+  // ── Theme toggle ──
+  let dark = true;
+
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+
+  // ── Self-quiz ──
+  const zones = {
+    notes:   { el: document.getElementById('notes-area'),   cls: 'quiz-notes'   },
+    summary: { el: document.getElementById('summary-area'), cls: 'quiz-summary' },
+  };
+
+  function toggle(key, btn) {
+    const { el, cls } = zones[key];
+    btn.classList.toggle('on', el.classList.toggle(cls));
+  }
+
+  function revealAll() {
+    Object.values(zones).forEach(({ el, cls }) => el.classList.remove(cls));
+    document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('on'));
+  }
+</script>
+
+</body>
+</html>

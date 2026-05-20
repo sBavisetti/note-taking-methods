@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentence Method — LLM Key Facts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    em{font-style:italic;color:var(--ghost)}
+    .card{max-width:860px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Sentence body ─── */
+    .sentence-body { padding: 1.75rem 2.25rem 2.5rem; }
+
+    .topic-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .63rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 2px 9px; border-radius: .375rem;
+      display: inline-block;
+      margin: 1.6rem 0 .8rem;
+    }
+    .topic-header:first-child { margin-top: 0; }
+
+    .sentence-list { list-style: none; padding: 0; }
+
+    .sentence-item {
+      display: flex; align-items: baseline; gap: .85rem;
+      padding: .45rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: background .12s ease;
+      border-radius: .35rem;
+      margin: 0 -.5rem;
+      padding-left: .5rem; padding-right: .5rem;
+    }
+    .sentence-item:last-child { border-bottom: none; }
+    .sentence-item:hover { background: var(--accent-soft); }
+
+    .sn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; font-weight: 500;
+      color: var(--accent); min-width: 2.2rem;
+      flex-shrink: 0; text-align: right;
+      line-height: 1.75;
+    }
+    .st {
+      font-size: .9375rem; color: var(--muted);
+      line-height: 1.72; flex: 1;
+    }
+    .st strong { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Sentence Method</span>
+        <span class="badge badge-neutral">#05</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Key Facts <span class="dim">— 40 Sentences</span></h1>
+      <p class="page-subtitle">One discrete fact per line — history, mechanics, limits, and applications</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="sentence-body">
+
+    <span class="topic-header">Origins &amp; History</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">01.</span><span class="st">The <strong>Transformer architecture</strong> was introduced in "Attention Is All You Need" (Vaswani et al., Google, 2017), replacing recurrent networks as the dominant sequence model.</span></li>
+      <li class="sentence-item"><span class="sn">02.</span><span class="st"><strong>GPT-1</strong> (2018) showed that unsupervised pre-training on raw text followed by fine-tuning could outperform task-specific supervised models.</span></li>
+      <li class="sentence-item"><span class="sn">03.</span><span class="st"><strong>BERT</strong> (2018) used bidirectional self-attention and masked language modelling, becoming the standard for discriminative NLP for several years.</span></li>
+      <li class="sentence-item"><span class="sn">04.</span><span class="st"><strong>GPT-3</strong> (2020, 175B parameters) demonstrated in-context learning — the ability to solve tasks from a few examples without any gradient update.</span></li>
+      <li class="sentence-item"><span class="sn">05.</span><span class="st"><strong>InstructGPT</strong> (2022) showed that RLHF dramatically improved GPT-3's helpfulness and reduced harmful outputs despite using a smaller model.</span></li>
+      <li class="sentence-item"><span class="sn">06.</span><span class="st"><strong>ChatGPT's</strong> public launch (November 2022) reached 100 million users in two months — the fastest consumer product adoption in history at that time.</span></li>
+      <li class="sentence-item"><span class="sn">07.</span><span class="st"><strong>LLaMA</strong> (Meta, 2023) was the first open-weight frontier-class model, enabling researchers and developers to run, fine-tune, and study a capable LLM locally.</span></li>
+    </ul>
+
+    <span class="topic-header">Architecture &amp; Mechanics</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">08.</span><span class="st">An LLM generates text by predicting a <strong>probability distribution over its vocabulary</strong> at each position, then sampling or taking the argmax.</span></li>
+      <li class="sentence-item"><span class="sn">09.</span><span class="st"><strong>Tokenization</strong> using Byte-Pair Encoding means the model never sees individual characters — letter-counting tasks ("how many e's in 'excellence'?") are unexpectedly hard.</span></li>
+      <li class="sentence-item"><span class="sn">10.</span><span class="st"><strong>Self-attention</strong> computes queries, keys, and values for each token, then scores all pairs and applies a weighted sum — this is what lets the model relate "it" to the noun it refers to.</span></li>
+      <li class="sentence-item"><span class="sn">11.</span><span class="st"><strong>Multi-head attention</strong> runs H independent attention computations in parallel, each learning to attend to different types of relationships (syntax, coreference, topic).</span></li>
+      <li class="sentence-item"><span class="sn">12.</span><span class="st">A typical frontier LLM has 32–96 Transformer layers; each layer has a self-attention sublayer and a <strong>feed-forward sublayer</strong> — both wrapped with layer normalisation and residual connections.</span></li>
+      <li class="sentence-item"><span class="sn">13.</span><span class="st">The <strong>KV-cache</strong> stores computed key and value tensors for previously generated tokens so the model doesn't recompute them at each new step — without it, generation would be O(n²).</span></li>
+      <li class="sentence-item"><span class="sn">14.</span><span class="st"><strong>Temperature</strong> scales the logits before softmax: low temperature makes outputs more deterministic; high temperature increases diversity and creativity, at the cost of coherence.</span></li>
+      <li class="sentence-item"><span class="sn">15.</span><span class="st"><strong>Top-p (nucleus) sampling</strong> dynamically selects the minimum set of tokens whose cumulative probability exceeds p before sampling, avoiding long tails of low-probability tokens.</span></li>
+    </ul>
+
+    <span class="topic-header">Training &amp; Scale</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">16.</span><span class="st">Frontier LLMs are trained on <strong>trillions of tokens</strong> — GPT-4 and LLaMA-3 training sets are estimated at 8–15 trillion tokens from web, books, and code.</span></li>
+      <li class="sentence-item"><span class="sn">17.</span><span class="st">The <strong>Chinchilla scaling law</strong> (Hoffmann et al., 2022) showed that optimal performance requires scaling training data proportionally with model size — previous models were undertrained.</span></li>
+      <li class="sentence-item"><span class="sn">18.</span><span class="st">Training a frontier model requires <strong>10²³–10²⁵ FLOPs</strong>, typically on thousands of GPUs (H100, A100) running continuously for weeks or months.</span></li>
+      <li class="sentence-item"><span class="sn">19.</span><span class="st"><strong>Emergent abilities</strong> — capabilities that suddenly appear at scale thresholds without specific training — include multi-step arithmetic, code generation, and translation into rare languages.</span></li>
+      <li class="sentence-item"><span class="sn">20.</span><span class="st"><strong>LoRA</strong> (Low-Rank Adaptation) fine-tunes only two small adapter matrices per layer, leaving the base model frozen, reducing trainable parameters by 99%+ and fitting on a single GPU.</span></li>
+    </ul>
+
+    <span class="topic-header">Limitations</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">21.</span><span class="st"><strong>Hallucination</strong> is not a bug — it's a consequence of the model predicting plausible tokens rather than verified ones; the model has no truth-checking mechanism built in.</span></li>
+      <li class="sentence-item"><span class="sn">22.</span><span class="st">LLMs have a <strong>knowledge cutoff date</strong> — facts from after the training data collection date are unknown unless injected via context, tools, or updated fine-tuning.</span></li>
+      <li class="sentence-item"><span class="sn">23.</span><span class="st">The <strong>lost-in-the-middle</strong> problem shows that LLMs attend more strongly to the beginning and end of long contexts, with important information in the middle sometimes ignored.</span></li>
+      <li class="sentence-item"><span class="sn">24.</span><span class="st"><strong>Prompt sensitivity</strong> is a real limitation — rephrasing the same question differently or changing capitalisation can change the model's answer significantly.</span></li>
+      <li class="sentence-item"><span class="sn">25.</span><span class="st">LLMs are <strong>stochastic</strong> — even with identical prompts, temperature > 0 means outputs vary between runs, making reproducibility a challenge in production systems.</span></li>
+      <li class="sentence-item"><span class="sn">26.</span><span class="st">Training data bias transfers into model behaviour — if the training corpus over-represents certain demographics, viewpoints, or languages, the model will reflect those biases in outputs.</span></li>
+    </ul>
+
+    <span class="topic-header">Techniques &amp; Mitigations</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">27.</span><span class="st"><strong>RAG</strong> (Retrieval-Augmented Generation) grounds responses in retrieved source documents, reducing hallucination and enabling use of up-to-date or proprietary information.</span></li>
+      <li class="sentence-item"><span class="sn">28.</span><span class="st"><strong>Chain-of-thought prompting</strong> ("think step by step") dramatically improves performance on multi-step reasoning tasks by eliciting intermediate steps before the final answer.</span></li>
+      <li class="sentence-item"><span class="sn">29.</span><span class="st"><strong>Few-shot prompting</strong> places 2–8 worked examples in the prompt before the test question; the model infers the task pattern from the examples without any weight updates.</span></li>
+      <li class="sentence-item"><span class="sn">30.</span><span class="st"><strong>System prompts</strong> prime the model's behaviour for a session — defining persona, constraints, output format, and domain knowledge before any user turn.</span></li>
+      <li class="sentence-item"><span class="sn">31.</span><span class="st"><strong>Tool use / function calling</strong> lets the model invoke external APIs, databases, and calculators at runtime, converting it from a static pattern-matcher to an active agent.</span></li>
+      <li class="sentence-item"><span class="sn">32.</span><span class="st"><strong>Speculative decoding</strong> uses a small "draft" model to propose multiple tokens, which a large "verifier" model checks in parallel, significantly reducing wall-clock generation time.</span></li>
+    </ul>
+
+    <span class="topic-header">Applications &amp; Impact</span>
+    <ul class="sentence-list">
+      <li class="sentence-item"><span class="sn">33.</span><span class="st"><strong>GitHub Copilot</strong>, built on Codex (GPT-3 fine-tuned on code), was adopted by 1 million developers within two months of launch, demonstrating clear ROI for AI-assisted coding.</span></li>
+      <li class="sentence-item"><span class="sn">34.</span><span class="st">LLMs pass the US Bar Exam, the USMLE medical licensing exam, and SAT reading at scores in the top 10–15% of human test-takers — as of GPT-4 and equivalents.</span></li>
+      <li class="sentence-item"><span class="sn">35.</span><span class="st"><strong>Agentic systems</strong> wrap LLMs in a loop: the model plans, calls tools, observes results, and updates its plan until a goal is accomplished — extending from single responses to multi-step workflows.</span></li>
+      <li class="sentence-item"><span class="sn">36.</span><span class="st">LLM-generated content is now common in customer support, content marketing, software documentation, legal drafting, and scientific literature — raising questions about attribution, accuracy, and over-reliance.</span></li>
+      <li class="sentence-item"><span class="sn">37.</span><span class="st">The <strong>inference cost</strong> for a single GPT-4 query is roughly $0.003–0.03 — cheap per-query but expensive at billion-query scale; cost reduction is a primary engineering goal.</span></li>
+      <li class="sentence-item"><span class="sn">38.</span><span class="st"><strong>Multimodal LLMs</strong> (GPT-4V, Gemini, Claude) accept images, audio, and video alongside text, enabling document parsing, diagram analysis, and audio transcription within a single model.</span></li>
+      <li class="sentence-item"><span class="sn">39.</span><span class="st"><strong>SWE-Bench</strong> measures LLM ability to fix real GitHub issues; top models solve 40–55% of issues autonomously — a task that was 0% two years prior.</span></li>
+      <li class="sentence-item"><span class="sn">40.</span><span class="st">The consensus in the field is that <strong>LLMs are tools, not oracles</strong> — they work best in human-in-the-loop systems where outputs are reviewed, verified, and grounded before action.</span></li>
+    </ul>
+
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

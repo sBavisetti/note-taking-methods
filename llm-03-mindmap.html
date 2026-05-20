@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind Map — The LLM Ecosystem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    .card{max-width:980px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    .map-container {
+      padding: 1.5rem 1.5rem 2rem;
+      overflow-x: auto;
+    }
+    .map-wrap {
+      min-width: 640px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    svg text { transition: fill .15s ease; }
+    .node-box { cursor: default; transition: opacity .15s ease; }
+    .node-box:hover rect { opacity: 1; stroke-width: 2; }
+    .node-box:hover text { fill: var(--text) !important; }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+      padding: 1rem 1.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: .4rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem; color: var(--muted);
+    }
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); opacity: .7;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Mind Map</span>
+        <span class="badge badge-neutral">#03</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">The LLM Ecosystem <span class="dim">— Landscape Map</span></h1>
+      <p class="page-subtitle">Eight branches of the Large Language Model world, visualised</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="map-container">
+    <div class="map-wrap">
+      <svg id="mindmap" viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+
+        <!-- ── Connecting lines (drawn first, covered by nodes) ── -->
+        <g id="lines" stroke-width="1.5" fill="none">
+          <line x1="450" y1="238" x2="450" y2="124" opacity=".35"/><!-- Architecture -->
+          <line x1="450" y1="246" x2="541" y2="187" opacity=".35"/><!-- Concepts -->
+          <line x1="492" y1="280" x2="605" y2="280" opacity=".35"/><!-- Models -->
+          <line x1="450" y1="314" x2="541" y2="373" opacity=".35"/><!-- Applications -->
+          <line x1="450" y1="322" x2="450" y2="436" opacity=".35"/><!-- Deployment -->
+          <line x1="450" y1="314" x2="359" y2="373" opacity=".35"/><!-- Limitations -->
+          <line x1="408" y1="280" x2="295" y2="280" opacity=".35"/><!-- Training -->
+          <line x1="450" y1="246" x2="359" y2="187" opacity=".35"/><!-- Techniques -->
+        </g>
+
+        <!-- ── Branch boxes (drawn over lines) ── -->
+
+        <!-- Architecture (top) cx=450, cy=82 → box 395,40 w=110 h=84 -->
+        <g class="node-box">
+          <rect x="395" y="40" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="403" y1="60" x2="497" y2="60" stroke="var(--border)" stroke-width=".5"/>
+          <text x="450" y="55" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Architecture</text>
+          <text x="405" y="74" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Transformer layers</text>
+          <text x="405" y="89" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-attention heads</text>
+          <text x="405" y="104" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Feed-forward network</text>
+        </g>
+
+        <!-- Concepts (top-right) cx=596, cy=145 → box 541,103 -->
+        <g class="node-box">
+          <rect x="541" y="103" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="549" y1="123" x2="643" y2="123" stroke="var(--border)" stroke-width=".5"/>
+          <text x="596" y="118" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Concepts</text>
+          <text x="551" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Tokens &amp; vocabulary</text>
+          <text x="551" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Embeddings</text>
+          <text x="551" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Context window</text>
+        </g>
+
+        <!-- Models (right) cx=660, cy=280 → box 605,238 -->
+        <g class="node-box">
+          <rect x="605" y="238" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="613" y1="258" x2="707" y2="258" stroke="var(--border)" stroke-width=".5"/>
+          <text x="660" y="253" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Models</text>
+          <text x="615" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ GPT-4o / o3</text>
+          <text x="615" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Claude / Gemini</text>
+          <text x="615" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Llama / Mistral</text>
+        </g>
+
+        <!-- Applications (bottom-right) cx=596, cy=415 → box 541,373 -->
+        <g class="node-box">
+          <rect x="541" y="373" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="549" y1="393" x2="643" y2="393" stroke="var(--border)" stroke-width=".5"/>
+          <text x="596" y="388" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Applications</text>
+          <text x="551" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Coding assistants</text>
+          <text x="551" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Document analysis</text>
+          <text x="551" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Search &amp; RAG</text>
+        </g>
+
+        <!-- Deployment (bottom) cx=450, cy=478 → box 395,436 -->
+        <g class="node-box">
+          <rect x="395" y="436" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="403" y1="456" x2="497" y2="456" stroke="var(--border)" stroke-width=".5"/>
+          <text x="450" y="451" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Deployment</text>
+          <text x="405" y="470" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Cloud API</text>
+          <text x="405" y="485" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-hosted</text>
+          <text x="405" y="500" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Edge / on-device</text>
+        </g>
+
+        <!-- Limitations (bottom-left) cx=304, cy=415 → box 249,373 -->
+        <g class="node-box">
+          <rect x="249" y="373" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="257" y1="393" x2="351" y2="393" stroke="var(--border)" stroke-width=".5"/>
+          <text x="304" y="388" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Limitations</text>
+          <text x="259" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Hallucination</text>
+          <text x="259" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Knowledge cutoff</text>
+          <text x="259" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Bias &amp; cost</text>
+        </g>
+
+        <!-- Training (left) cx=240, cy=280 → box 185,238 -->
+        <g class="node-box">
+          <rect x="185" y="238" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="193" y1="258" x2="287" y2="258" stroke="var(--border)" stroke-width=".5"/>
+          <text x="240" y="253" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Training</text>
+          <text x="195" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Pre-training</text>
+          <text x="195" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Fine-tuning (SFT)</text>
+          <text x="195" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ RLHF / DPO</text>
+        </g>
+
+        <!-- Techniques (top-left) cx=304, cy=145 → box 249,103 -->
+        <g class="node-box">
+          <rect x="249" y="103" width="110" height="84" rx="8"
+            fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
+          <line x1="257" y1="123" x2="351" y2="123" stroke="var(--border)" stroke-width=".5"/>
+          <text x="304" y="118" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Techniques</text>
+          <text x="259" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Prompt engineering</text>
+          <text x="259" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Chain-of-thought</text>
+          <text x="259" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Agentic loops</text>
+        </g>
+
+        <!-- ── Centre hub (drawn last so it's on top) ── -->
+        <circle cx="450" cy="280" r="42" fill="var(--accent)"/>
+        <text x="450" y="275" text-anchor="middle" dominant-baseline="auto"
+          font-family="Inter" font-weight="800" font-size="18" fill="white" letter-spacing="-.5">LLM</text>
+        <text x="450" y="293" text-anchor="middle" dominant-baseline="auto"
+          font-family="JetBrains Mono" font-size="8.5" fill="rgba(255,255,255,.65)" letter-spacing=".08em">ECOSYSTEM</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ghost);margin-right:.4rem;">Branches:</span>
+    <span class="legend-item"><span class="legend-dot"></span>Architecture</span>
+    <span class="legend-item"><span class="legend-dot"></span>Concepts</span>
+    <span class="legend-item"><span class="legend-dot"></span>Models</span>
+    <span class="legend-item"><span class="legend-dot"></span>Applications</span>
+    <span class="legend-item"><span class="legend-dot"></span>Deployment</span>
+    <span class="legend-item"><span class="legend-dot"></span>Limitations</span>
+    <span class="legend-item"><span class="legend-dot"></span>Training</span>
+    <span class="legend-item"><span class="legend-dot"></span>Techniques</span>
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+    // Recolor SVG lines for theme
+    const lines = document.querySelectorAll('#lines line');
+    lines.forEach(l => l.setAttribute('stroke', dark ? '#38bdf8' : '#0ea5e9'));
+  }
+  // Set initial line color
+  document.querySelectorAll('#lines line').forEach(l => l.setAttribute('stroke', '#38bdf8'));
+</script>
+</body>
+</html>

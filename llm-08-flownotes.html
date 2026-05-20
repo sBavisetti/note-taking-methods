@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow Notes — LLM Inference Process</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    .card{max-width:980px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Flow diagram ─── */
+    .flow-body { padding: 1.5rem 1.75rem 2rem; overflow-x: auto; }
+
+    .flow-diagram-wrap { min-width: 680px; }
+
+    svg text { font-family: 'Inter', sans-serif; }
+    .flow-node { cursor: default; }
+    .flow-node rect { transition: stroke-width .15s ease; }
+    .flow-node:hover rect { stroke-width: 2; }
+    .flow-node:hover text { fill: var(--text) !important; }
+    .side-node rect { stroke-dasharray: 5 3; }
+
+    /* ─── Annotation legend ─── */
+    .flow-legend {
+      border-top: 1px solid var(--border);
+      background: var(--surface-hi);
+      padding: 1.1rem 1.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: .65rem 1.5rem;
+    }
+    .leg-item {
+      display: flex; align-items: flex-start; gap: .6rem;
+    }
+    .leg-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); margin-top: .35rem; flex-shrink: 0;
+    }
+    .leg-dot.dashed {
+      background: transparent;
+      border: 1.5px dashed var(--accent);
+    }
+    .leg-text {
+      font-size: .8rem; color: var(--muted); line-height: 1.5;
+    }
+    .leg-text strong { color: var(--text); font-weight: 600; font-size: .82rem; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Flow Notes</span>
+        <span class="badge badge-neutral">#08</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Inference Process <span class="dim">— Flow Diagram</span></h1>
+      <p class="page-subtitle">From user prompt to generated token — one connected, free-form trace</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="flow-body">
+    <div class="flow-diagram-wrap">
+      <svg id="flow-svg" viewBox="0 0 920 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 9 3.5, 0 7" fill-opacity=".7"/>
+          </marker>
+          <marker id="arr-d" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 9 3.5, 0 7" fill-opacity=".4"/>
+          </marker>
+        </defs>
+
+        <!-- ── ROW 1: left-to-right main path ── -->
+
+        <!-- Arrow 1→2: User Prompt → Tokenizer -->
+        <path d="M 152 115 Q 180 100 200 90" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- Arrow 2→3: Tokenizer → Embedding -->
+        <path d="M 310 80 Q 330 78 348 95" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- Arrow 3→4: Embedding → Transformer -->
+        <path d="M 460 115 Q 478 118 494 130" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- Arrow 4→5: Transformer → Output Head (same row, right) -->
+        <path d="M 660 155 Q 680 155 696 155" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- ── DOWN connector: Output Head → Softmax ── -->
+        <path d="M 762 195 Q 762 220 762 240" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- ── ROW 2: right-to-left return path ── -->
+
+        <!-- Arrow 5→6: Softmax → Sampling -->
+        <path d="M 720 280 Q 700 280 680 280" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- Arrow 6→7: Sampling → Generated Token -->
+        <path d="M 560 280 Q 542 280 524 280" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+
+        <!-- Arrow 7→output: Generated Token → Auto-regressive feedback -->
+        <path d="M 400 310 Q 380 360 300 370 Q 120 380 100 310 Q 90 250 95 200 Q 98 165 120 145" fill="none" stroke-width="1.5" stroke-opacity=".35" stroke-dasharray="6 4" marker-end="url(#arr-d)"/>
+
+        <!-- ── SIDE annotations (dashed connections) ── -->
+
+        <!-- System Prompt → feeds into tokenizer area -->
+        <path d="M 220 30 Q 220 52 228 65" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
+
+        <!-- KV Cache side note → Transformer -->
+        <path d="M 575 230 L 575 198" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
+
+        <!-- Temperature → Sampling -->
+        <path d="M 630 330 L 630 310" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
+
+        <!-- ── MAIN NODES ── -->
+
+        <!-- Node 1: User Prompt (20,80 → 130×65) -->
+        <g class="flow-node">
+          <rect x="20" y="82" width="132" height="65" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="86" y="108" text-anchor="middle" font-size="11" font-weight="700">User Prompt</text>
+          <text x="86" y="126" text-anchor="middle" font-size="9" opacity=".65">"Explain backprop"</text>
+          <text x="86" y="140" text-anchor="middle" font-size="9" opacity=".5">natural language input</text>
+        </g>
+
+        <!-- Node 2: Tokenizer (200,60 → 110×55) -->
+        <g class="flow-node">
+          <rect x="200" y="60" width="110" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="255" y="83" text-anchor="middle" font-size="11" font-weight="700">Tokenizer</text>
+          <text x="255" y="99" text-anchor="middle" font-size="9" opacity=".65">BPE / SentencePiece</text>
+          <text x="255" y="111" text-anchor="middle" font-size="9" opacity=".5">text → [token IDs]</text>
+        </g>
+
+        <!-- Node 3: Embedding (348,80 → 112×65) -->
+        <g class="flow-node">
+          <rect x="348" y="80" width="112" height="65" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="404" y="106" text-anchor="middle" font-size="11" font-weight="700">Embedding</text>
+          <text x="404" y="122" text-anchor="middle" font-size="9" opacity=".65">+ pos. encoding</text>
+          <text x="404" y="136" text-anchor="middle" font-size="9" opacity=".5">IDs → dense vectors</text>
+        </g>
+
+        <!-- Node 4: Transformer (494,110 → 166×80) accent highlight -->
+        <g class="flow-node">
+          <rect x="494" y="110" width="166" height="85" rx="8" stroke-width="2" fill-opacity=".95"/>
+          <text x="577" y="137" text-anchor="middle" font-size="12" font-weight="800">Transformer</text>
+          <text x="577" y="154" text-anchor="middle" font-size="9.5" font-weight="600" opacity=".75">× 32–96 layers</text>
+          <text x="577" y="172" text-anchor="middle" font-size="8.5" opacity=".55">self-attn → FFN → LayerNorm</text>
+          <text x="577" y="185" text-anchor="middle" font-size="8.5" opacity=".55">hidden state h ∈ ℝ^d_model</text>
+        </g>
+
+        <!-- Node 5: Output Head (696,130 → 125×65) -->
+        <g class="flow-node">
+          <rect x="696" y="130" width="125" height="65" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="758" y="155" text-anchor="middle" font-size="11" font-weight="700">Output Head</text>
+          <text x="758" y="171" text-anchor="middle" font-size="9" opacity=".65">linear projection</text>
+          <text x="758" y="183" text-anchor="middle" font-size="9" opacity=".5">h → logits ∈ ℝ^|vocab|</text>
+        </g>
+
+        <!-- Node 6: Softmax (720,250 → 100×55) -->
+        <g class="flow-node">
+          <rect x="720" y="250" width="100" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="770" y="273" text-anchor="middle" font-size="11" font-weight="700">Softmax</text>
+          <text x="770" y="289" text-anchor="middle" font-size="9" opacity=".65">logits → probs</text>
+          <text x="770" y="301" text-anchor="middle" font-size="8.5" opacity=".5">sum to 1.0</text>
+        </g>
+
+        <!-- Node 7: Sampling (560,255 → 120×55) -->
+        <g class="flow-node">
+          <rect x="560" y="255" width="120" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="620" y="278" text-anchor="middle" font-size="11" font-weight="700">Sampling</text>
+          <text x="620" y="294" text-anchor="middle" font-size="9" opacity=".65">temp · top-p</text>
+          <text x="620" y="306" text-anchor="middle" font-size="8.5" opacity=".5">→ token selected</text>
+        </g>
+
+        <!-- Node 8: Generated Token (390,255 → 130×55) -->
+        <g class="flow-node">
+          <rect x="390" y="255" width="130" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="455" y="278" text-anchor="middle" font-size="11" font-weight="700">Generated Token</text>
+          <text x="455" y="294" text-anchor="middle" font-size="9" opacity=".65">appended to sequence</text>
+          <text x="455" y="306" text-anchor="middle" font-size="8.5" opacity=".5">loop until &lt;eos&gt;</text>
+        </g>
+
+        <!-- ── SIDE NOTE NODES (dashed borders) ── -->
+
+        <!-- System Prompt -->
+        <g class="side-node flow-node">
+          <rect x="140" y="8" width="160" height="40" rx="7" fill-opacity=".5" stroke-width="1"/>
+          <text x="220" y="24" text-anchor="middle" font-size="9.5" font-weight="600">System Prompt</text>
+          <text x="220" y="39" text-anchor="middle" font-size="8.5" opacity=".6">prepended before user turn</text>
+        </g>
+
+        <!-- KV Cache -->
+        <g class="side-node flow-node">
+          <rect x="510" y="215" width="130" height="40" rx="7" fill-opacity=".5" stroke-width="1"/>
+          <text x="575" y="231" text-anchor="middle" font-size="9.5" font-weight="600">KV Cache</text>
+          <text x="575" y="247" text-anchor="middle" font-size="8.5" opacity=".6">prev. K,V stored → O(1) step</text>
+        </g>
+
+        <!-- Temperature note -->
+        <g class="side-node flow-node">
+          <rect x="570" y="318" width="120" height="40" rx="7" fill-opacity=".5" stroke-width="1"/>
+          <text x="630" y="334" text-anchor="middle" font-size="9.5" font-weight="600">Temperature T</text>
+          <text x="630" y="350" text-anchor="middle" font-size="8.5" opacity=".6">0 = greedy · 1 = standard</text>
+        </g>
+
+        <!-- Auto-regressive label on feedback arrow -->
+        <text x="55" y="372" font-size="8.5" opacity=".45" font-style="italic">auto-regressive loop</text>
+
+        <!-- Row labels -->
+        <text x="10" y="52" font-size="8" font-weight="600" letter-spacing=".08em" text-transform="uppercase" opacity=".4">FORWARD PASS</text>
+        <text x="390" y="245" font-size="8" font-weight="600" letter-spacing=".08em" opacity=".4">DECODE</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <div class="flow-legend">
+    <div class="leg-item">
+      <span class="leg-dot"></span>
+      <div class="leg-text"><strong>Tokenizer</strong> splits input text into integer IDs from a fixed vocabulary. ~1.3 tokens per English word.</div>
+    </div>
+    <div class="leg-item">
+      <span class="leg-dot"></span>
+      <div class="leg-text"><strong>Transformer ×N</strong> is the core compute. Each of the N layers runs multi-head self-attention and a feed-forward network.</div>
+    </div>
+    <div class="leg-item">
+      <span class="leg-dot"></span>
+      <div class="leg-text"><strong>KV-Cache</strong> stores computed keys and values so each new token only needs one forward pass, not N².</div>
+    </div>
+    <div class="leg-item">
+      <span class="leg-dot dashed"></span>
+      <div class="leg-text"><strong>Auto-regressive loop:</strong> each generated token is appended to the input and fed back through the model until &lt;eos&gt;.</div>
+    </div>
+    <div class="leg-item">
+      <span class="leg-dot"></span>
+      <div class="leg-text"><strong>Temperature and top-p</strong> control diversity. T=0 is greedy; T=0.7 + top-p=0.9 is typical for chat.</div>
+    </div>
+    <div class="leg-item">
+      <span class="leg-dot dashed"></span>
+      <div class="leg-text"><strong>System prompt</strong> is prepended before the user turn and shapes model persona, constraints, and output format.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let dark = true;
+
+  function applyTheme() {
+    const isDark = dark;
+    const accent = isDark ? '#38bdf8' : '#0ea5e9';
+    const surface = isDark ? '#131316' : '#ffffff';
+    const surfHi = isDark ? '#1c1c20' : '#f4f4f1';
+    const border = isDark ? '#27272a' : '#e4e4e7';
+    const text = isDark ? '#f4f4f5' : '#18181b';
+    const muted = isDark ? '#a1a1aa' : '#52525b';
+    const accentSoft = isDark ? 'rgba(56,189,248,.08)' : 'rgba(14,165,233,.08)';
+
+    // Set main node colors
+    document.querySelectorAll('.flow-node rect:not(.side-node rect)').forEach(r => {
+      r.setAttribute('fill', surface);
+      r.setAttribute('stroke', accent);
+    });
+    document.querySelectorAll('.side-node rect').forEach(r => {
+      r.setAttribute('fill', surfHi);
+      r.setAttribute('stroke', accent);
+    });
+    // Transformer accent highlight
+    const tfRect = document.querySelector('#flow-svg .flow-node:nth-child(9) rect');
+    if (tfRect) {
+      tfRect.setAttribute('fill', accentSoft);
+      tfRect.setAttribute('stroke', accent);
+    }
+    document.querySelectorAll('#flow-svg text').forEach(t => {
+      const cl = t.getAttribute('opacity');
+      if (!cl || parseFloat(cl) > 0.6) t.setAttribute('fill', text);
+      else t.setAttribute('fill', muted);
+    });
+    document.querySelectorAll('#flow-svg path, #flow-svg polygon').forEach(p => {
+      p.setAttribute('stroke', accent);
+      p.setAttribute('fill', p.tagName === 'polygon' ? accent : 'none');
+    });
+    document.querySelectorAll('#flow-svg marker polygon').forEach(p => {
+      p.setAttribute('fill', accent);
+    });
+  }
+
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+    applyTheme();
+  }
+  applyTheme();
+</script>
+</body>
+</html>

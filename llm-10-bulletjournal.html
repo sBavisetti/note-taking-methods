@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bullet Journal — Building with LLMs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    em{font-style:italic;color:var(--ghost)}
+    code{font-family:'JetBrains Mono',monospace;font-size:.8em;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-ring);padding:1px 6px;border-radius:4px;}
+    .card{max-width:820px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── BuJo layout ─── */
+    .buj-body { padding: 1.75rem 2.25rem 2.5rem; }
+
+    /* Monthly / section header */
+    .month-header {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em;
+      color: var(--text); margin-bottom: 1.2rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid var(--accent);
+      display: flex; align-items: baseline; gap: .75rem;
+    }
+    .month-header span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; font-weight: 500;
+      color: var(--accent); letter-spacing: .04em;
+    }
+
+    /* Day entry */
+    .day-entry { margin-bottom: 1.3rem; }
+    .day-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; font-weight: 600;
+      color: var(--accent); letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: .35rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .day-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* Bullet items */
+    .log { list-style: none; padding: 0; }
+    .log li {
+      display: flex; align-items: baseline; gap: .65rem;
+      padding: .28rem 0;
+      font-size: .9rem; color: var(--muted); line-height: 1.65;
+      border-radius: .3rem; transition: background .12s ease;
+      margin: 0 -.4rem; padding-left: .4rem; padding-right: .4rem;
+    }
+    .log li:hover { background: var(--accent-soft); }
+
+    /* Symbol types */
+    .sym {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem; flex-shrink: 0;
+      width: 1.1rem; text-align: center; line-height: 1.65;
+    }
+    .sym-task    { color: var(--accent); }           /* • */
+    .sym-done    { color: #22c55e; }                 /* ✕ */
+    .sym-event   { color: #a78bfa; }                 /* ○ */
+    .sym-note    { color: var(--ghost); }            /* — */
+    .sym-star    { color: #f59e0b; }                 /* ✦ */
+    .sym-migrate { color: var(--muted); opacity:.5; }/* > */
+
+    /* Nested items */
+    .log li.indent {
+      padding-left: 2.15rem; font-size: .865rem;
+    }
+    .log li.indent .sym { font-size: .72rem; }
+
+    .note-inline { color: var(--ghost); font-style: italic; font-size: .85em; }
+
+    /* Future log / index section */
+    .future-box {
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: .6rem;
+      padding: 1rem 1.2rem 1.1rem;
+      margin-top: 1.5rem;
+    }
+    .future-box-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: .65rem;
+    }
+
+    /* Legend */
+    .legend-bar {
+      background: var(--surface-hi);
+      border-top: 1px solid var(--border);
+      padding: .85rem 2.25rem;
+      display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+    }
+    .leg { display: flex; align-items: center; gap: .35rem; color: var(--ghost); }
+    .leg b { font-size: .8rem; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Bullet Journal</span>
+        <span class="badge badge-neutral">#10</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">Building with LLMs <span class="dim">— Dev Log</span></h1>
+      <p class="page-subtitle">Rapid-logging a developer's journey through LLM concepts, tools, and experiments</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">May 2026</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="buj-body">
+
+    <div class="month-header">May 2026 <span>LLM Dev Sprint</span></div>
+
+    <!-- Day 1 -->
+    <div class="day-entry">
+      <div class="day-label">Mon 05 May</div>
+      <ul class="log">
+        <li><span class="sym sym-star">✦</span> <strong>Goal:</strong> Build a production-ready RAG pipeline for our internal knowledge base by end of month</li>
+        <li><span class="sym sym-event">○</span> Kickoff meeting — chose <strong>Claude Sonnet</strong> as base model; decided against GPT-4o for cost at scale</li>
+        <li><span class="sym sym-task">•</span> Read the Anthropic API docs — tool use, context caching, prompt caching endpoints</li>
+        <li><span class="sym sym-done">✕</span> Set up dev environment: <code>anthropic</code> Python SDK, <code>chromadb</code> for vector store, <code>sentence-transformers</code></li>
+        <li><span class="sym sym-note">—</span> Prompt caching saves 90% cost for repeated system prompts — critical for our use case</li>
+        <li class="indent"><span class="sym sym-note">—</span> Min 1024 tokens in system prompt to qualify for caching</li>
+        <li><span class="sym sym-task">•</span> Choose embedding model: <code>text-embedding-3-small</code> vs <code>nomic-embed-text</code> — benchmark both</li>
+      </ul>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-entry">
+      <div class="day-label">Tue 06 May</div>
+      <ul class="log">
+        <li><span class="sym sym-done">✕</span> Embedded 2,400 internal docs into ChromaDB — avg 500 tokens/chunk with 50-token overlap</li>
+        <li><span class="sym sym-star">✦</span> Chunk size matters enormously — too large = diluted retrieval, too small = loses context. 400–600 tokens is the sweet spot for prose.</li>
+        <li><span class="sym sym-note">—</span> Tried cosine similarity retrieval top-k=5; recall was poor on multi-hop questions</li>
+        <li><span class="sym sym-task">•</span> Investigate hybrid search (BM25 + dense) to improve recall on keyword-heavy queries</li>
+        <li><span class="sym sym-event">○</span> Read "RAPTOR" paper — hierarchical summarisation of document trees improves long-doc retrieval</li>
+        <li><span class="sym sym-task">•</span> Add re-ranking step: <code>cross-encoder/ms-marco-MiniLM</code> to sort retrieved chunks by relevance</li>
+        <li><span class="sym sym-note">—</span> Hallucinations still occur even with retrieval — model sometimes "fills in" missing context</li>
+        <li class="indent"><span class="sym sym-note">—</span> Mitigation: add explicit instruction "Answer only using provided context. Say 'I don't know' if not found."</li>
+      </ul>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-entry">
+      <div class="day-label">Wed 07 May</div>
+      <ul class="log">
+        <li><span class="sym sym-done">✕</span> Implemented hybrid retrieval — BM25 for keyword match + dense vector for semantic; improved top-5 recall by ~22%</li>
+        <li><span class="sym sym-event">○</span> Pair-programmed with Claude on the re-ranking code — caught a subtle bug in batching logic</li>
+        <li><span class="sym sym-star">✦</span> Tool use pattern: give the model a <code>search_docs(query)</code> tool — it reformulates its own retrieval query, which is often better than passing the raw user query verbatim</li>
+        <li><span class="sym sym-task">•</span> Implement query rewriting: model rephrases user question to maximise retrieval recall before search</li>
+        <li><span class="sym sym-note">—</span> Latency budget: 200ms retrieval + 800ms LLM generation = ~1s p95. Acceptable for async chat.</li>
+        <li><span class="sym sym-migrate">›</span> Stream responses to frontend — reduces <em>perceived</em> latency even if total time is similar</li>
+      </ul>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-entry">
+      <div class="day-label">Thu 08 May</div>
+      <ul class="log">
+        <li><span class="sym sym-done">✕</span> Streaming SSE endpoint live — time-to-first-token ~220ms, feels snappy</li>
+        <li><span class="sym sym-event">○</span> Demo to stakeholders — major feedback: "It sometimes makes things up confidently"</li>
+        <li><span class="sym sym-star">✦</span> Always include source citations in the response. Users trust grounded answers significantly more, and it makes hallucinations immediately visible.</li>
+        <li><span class="sym sym-task">•</span> Add citation injection: append source doc titles and URLs to each answer</li>
+        <li><span class="sym sym-task">•</span> Implement output validation: check if all claims in response are supported by retrieved chunks</li>
+        <li><span class="sym sym-note">—</span> Considered fine-tuning but decided against it — RAG improvements are faster to iterate and don't require retraining</li>
+        <li class="indent"><span class="sym sym-note">—</span> Fine-tune only for style/format, not for factual knowledge</li>
+      </ul>
+    </div>
+
+    <!-- Day 5 -->
+    <div class="day-entry">
+      <div class="day-label">Fri 09 May</div>
+      <ul class="log">
+        <li><span class="sym sym-done">✕</span> Citation format: <code>[1] doc_title (section)</code> appended inline — clean and clear</li>
+        <li><span class="sym sym-done">✕</span> Basic evals suite: 50 question-answer pairs with known ground truth — baseline 62% exact match</li>
+        <li><span class="sym sym-note">—</span> Eval insight: hardest questions are multi-doc — require reasoning across 3+ sources</li>
+        <li><span class="sym sym-task">•</span> Next week: implement multi-hop retrieval for complex queries</li>
+        <li><span class="sym sym-task">•</span> Write prompt variants for system message — A/B test conciseness vs. detail level</li>
+        <li><span class="sym sym-event">○</span> Read Anthropic's "Building Effective Agents" post — key insight: start simple (single LLM call), add complexity (tools, loops) only when needed</li>
+        <li><span class="sym sym-star">✦</span> Most LLM application bugs are prompt bugs, not code bugs. Invest time in prompt engineering before optimising infrastructure.</li>
+      </ul>
+    </div>
+
+    <!-- Week 2 sprint summary -->
+    <div class="day-entry">
+      <div class="day-label">Mon 12 May — Weekly Review</div>
+      <ul class="log">
+        <li><span class="sym sym-event">○</span> Sprint retrospective: RAG pipeline MVP shipped. Evals at 78% (+16pp from week 1).</li>
+        <li><span class="sym sym-star">✦</span> The three highest-leverage improvements so far: (1) hybrid retrieval, (2) query rewriting, (3) "answer only from context" instruction</li>
+        <li><span class="sym sym-note">—</span> Open question: how to handle queries that are intentionally out-of-scope? Need a classifier or "I don't know" path</li>
+        <li><span class="sym sym-task">•</span> This week: agentic loop — let the model decide when to search vs. answer directly</li>
+        <li><span class="sym sym-task">•</span> Explore multi-agent: planner LLM → executor LLM → reviewer LLM for complex multi-step tasks</li>
+        <li><span class="sym sym-migrate">›</span> Migrate eval harness to <code>promptfoo</code> for better parallelism and LLM-as-judge scoring</li>
+      </ul>
+    </div>
+
+    <!-- Future Log -->
+    <div class="future-box">
+      <div class="future-box-title">Future Log — Scheduled Tasks</div>
+      <ul class="log" style="margin:0">
+        <li><span class="sym sym-task">•</span> <strong>19 May:</strong> Multi-hop retrieval experiment — chained queries for complex questions</li>
+        <li><span class="sym sym-task">•</span> <strong>22 May:</strong> Fine-grained context caching — measure cost reduction on high-traffic prompts</li>
+        <li><span class="sym sym-task">•</span> <strong>26 May:</strong> Load test pipeline at 100 concurrent users — identify bottlenecks</li>
+        <li><span class="sym sym-task">•</span> <strong>31 May:</strong> Full eval suite — target 85% on 200-question benchmark before v1 launch</li>
+        <li><span class="sym sym-event">○</span> <strong>02 Jun:</strong> v1 soft launch to 50 internal users</li>
+        <li><span class="sym sym-note">—</span> Ongoing: monitor token usage, latency, and hallucination rate via structured logging</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="legend-bar">
+    <span class="leg"><b class="sym-task">•</b> task to do</span>
+    <span class="leg"><b class="sym-done">✕</b> completed</span>
+    <span class="leg"><b class="sym-event">○</b> event / read</span>
+    <span class="leg"><b class="sym-note">—</b> note / observation</span>
+    <span class="leg"><b class="sym-star">✦</b> key insight</span>
+    <span class="leg"><b class="sym-migrate">›</b> migrated forward</span>
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

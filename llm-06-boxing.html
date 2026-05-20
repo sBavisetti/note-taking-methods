@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boxing Method — LLM Applications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    .card{max-width:980px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Boxing layout ─── */
+    .boxes-body { padding: 1.75rem 1.75rem 2.25rem; }
+
+    .boxes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .box {
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: .6rem;
+      padding: 1.1rem 1.2rem 1.3rem;
+      transition: box-shadow .2s ease, border-color .15s ease;
+    }
+    .box:hover {
+      border-top-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-ring), 0 4px 12px rgba(0,0,0,.06);
+    }
+
+    .box-header {
+      display: flex; align-items: center; gap: .55rem;
+      margin-bottom: .7rem;
+    }
+    .box-icon {
+      font-size: 1.05rem; line-height: 1;
+    }
+    .box-title {
+      font-size: .875rem; font-weight: 700;
+      color: var(--text); letter-spacing: -.01em;
+    }
+    .box-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin-bottom: .7rem;
+    }
+    .box-desc {
+      font-size: .83rem; color: var(--muted);
+      line-height: 1.65; margin-bottom: .7rem;
+    }
+    .use-list { list-style: none; padding: 0; }
+    .use-list li {
+      position: relative; padding-left: 1rem;
+      font-size: .83rem; color: var(--muted);
+      line-height: 1.65; margin-bottom: .2rem;
+    }
+    .use-list li::before {
+      content: '—'; position: absolute; left: 0;
+      color: var(--accent); font-size: .7rem; top: .28em;
+    }
+    .box-footer {
+      margin-top: .8rem; padding-top: .65rem;
+      border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem; color: var(--ghost);
+    }
+    .box-footer strong { color: var(--muted); }
+
+    .wide { grid-column: 1 / -1; }
+    .wide .use-list {
+      columns: 2; gap: 1.2rem;
+    }
+    @media (max-width:600px) { .wide .use-list { columns: 1; } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Boxing Method</span>
+        <span class="badge badge-neutral">#06</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Applications <span class="dim">— By Domain</span></h1>
+      <p class="page-subtitle">Use cases grouped into distinct boxes — one domain, one box</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="boxes-body">
+    <div class="boxes-grid">
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">💻</span><span class="box-title">Software Development</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">LLMs have become standard tools in developer workflows, accelerating everything from boilerplate generation to architectural review.</p>
+        <ul class="use-list">
+          <li>Code completion and generation (Copilot, Cursor)</li>
+          <li>Automated code review and refactoring</li>
+          <li>Test generation from function signatures</li>
+          <li>Bug explanation and auto-fix suggestions</li>
+          <li>Documentation and docstring generation</li>
+          <li>SQL, regex, and shell command synthesis</li>
+        </ul>
+        <div class="box-footer"><strong>Impact:</strong> 30–55% reported dev-speed improvements in surveys</div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">⚕️</span><span class="box-title">Healthcare &amp; Medicine</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">Clinical text is dense, structured, and high-stakes — LLMs assist with understanding and generation while humans remain in the loop.</p>
+        <ul class="use-list">
+          <li>Summarising long patient records for clinicians</li>
+          <li>Differential diagnosis support from symptoms</li>
+          <li>Translating medical jargon for patients</li>
+          <li>Drug interaction lookup and triage assistance</li>
+          <li>Clinical trial protocol drafting</li>
+          <li>Medical imaging report generation</li>
+        </ul>
+        <div class="box-footer"><strong>Caution:</strong> Never deploy without clinical oversight and validation</div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">📚</span><span class="box-title">Education &amp; Learning</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">Personalised tutoring at scale — LLMs can adapt explanations to a student's level, generate practice problems, and give instant feedback.</p>
+        <ul class="use-list">
+          <li>Adaptive tutoring in math, science, language</li>
+          <li>Essay feedback and revision suggestions</li>
+          <li>Concept explanation at multiple difficulty levels</li>
+          <li>Quiz and flashcard generation from notes</li>
+          <li>Language learning conversation partners</li>
+          <li>Lecture summarisation and Q&amp;A</li>
+        </ul>
+        <div class="box-footer"><strong>Tool:</strong> Khan Academy's Khanmigo, Duolingo Max</div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">✍️</span><span class="box-title">Creative &amp; Content</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">From first draft to polished copy, LLMs augment creative work — not replacing the human voice but accelerating production and exploration.</p>
+        <ul class="use-list">
+          <li>Copywriting and marketing content at scale</li>
+          <li>Story ideation and narrative outlining</li>
+          <li>Script and screenplay development</li>
+          <li>SEO article drafting and rephrasing</li>
+          <li>Social media and email campaign writing</li>
+          <li>Poetry, lyrics, and experimental prose</li>
+        </ul>
+        <div class="box-footer"><strong>Risk:</strong> Homogenised style, attribution ambiguity</div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">🏢</span><span class="box-title">Business &amp; Enterprise</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">Knowledge work inside organisations — from support tickets to strategy documents — is being compressed and automated with LLM-powered tools.</p>
+        <ul class="use-list">
+          <li>Customer support chatbots with knowledge bases</li>
+          <li>Contract analysis and legal document review</li>
+          <li>Earnings call and report summarisation</li>
+          <li>HR onboarding and policy Q&amp;A systems</li>
+          <li>Meeting transcription and action-item extraction</li>
+          <li>Internal knowledge management and search</li>
+        </ul>
+        <div class="box-footer"><strong>Deployment:</strong> Often via RAG over internal document stores</div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><span class="box-icon">🔬</span><span class="box-title">Research &amp; Science</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">LLMs are becoming research accelerators — digesting literature, hypothesising, and generating experimental designs at speeds no human team can match.</p>
+        <ul class="use-list">
+          <li>Systematic literature review over thousands of papers</li>
+          <li>Hypothesis generation from experimental data</li>
+          <li>Protein structure and drug molecule design (AlphaFold paradigm)</li>
+          <li>Research paper writing and editing assistance</li>
+          <li>Code generation for data analysis pipelines</li>
+          <li>Cross-disciplinary knowledge synthesis</li>
+        </ul>
+        <div class="box-footer"><strong>Caution:</strong> Hallucinated citations remain a persistent problem</div>
+      </div>
+
+      <div class="box wide">
+        <div class="box-header"><span class="box-icon">🤖</span><span class="box-title">Agentic &amp; Automation — Cross-Domain</span></div>
+        <hr class="box-divider">
+        <p class="box-desc">The most powerful applications combine LLM reasoning with tools, memory, and external systems — building autonomous agents that plan, act, and iterate without constant human input.</p>
+        <ul class="use-list">
+          <li>Web browsing, form-filling, and data scraping agents</li>
+          <li>Autonomous software engineering (SWE-agent, Devin patterns)</li>
+          <li>Multi-agent pipelines: planner → executor → reviewer</li>
+          <li>Computer-use agents that operate GUIs directly</li>
+          <li>Email and calendar management assistants</li>
+          <li>Financial data analysis and report generation workflows</li>
+          <li>CI/CD pipeline monitoring and auto-remediation</li>
+          <li>Research agents that search, read papers, and synthesise findings</li>
+        </ul>
+        <div class="box-footer"><strong>Key requirement:</strong> Tool use, long context, reliable instruction-following, and robust error recovery</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

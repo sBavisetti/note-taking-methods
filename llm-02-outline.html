@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outline Method — LLM Training Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+    em{font-style:italic;color:var(--ghost)}
+    code{font-family:'JetBrains Mono',monospace;font-size:.8em;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-ring);padding:1px 6px;border-radius:4px;}
+    .card{max-width:860px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:.75rem;box-shadow:var(--shadow-md);overflow:hidden;}
+    .page-header{background:var(--surface-hi);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Outline-specific layout ─── */
+    .outline-body { padding: 2rem 2.5rem 2.5rem; }
+
+    .outline-section {
+      margin-bottom: 1.5rem;
+    }
+    .outline-section:last-child { margin-bottom: 0; }
+
+    /* Level 1 — Roman numerals */
+    .l1 {
+      display: flex; align-items: baseline; gap: .75rem;
+      padding: .7rem 0 .5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: .6rem;
+    }
+    .l1-num {
+      font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+      font-weight: 600; color: var(--accent); min-width: 2rem;
+      letter-spacing: .02em;
+    }
+    .l1-text {
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      letter-spacing: -.01em;
+    }
+    .l1-note {
+      font-size: .78rem; color: var(--ghost); font-weight: 400;
+      margin-left: .4rem;
+    }
+
+    /* Level 2 — Letters */
+    .l2-group { padding-left: 2.2rem; margin-bottom: .35rem; }
+    .l2 {
+      display: flex; align-items: baseline; gap: .6rem;
+      padding: .35rem 0 .2rem;
+    }
+    .l2-num {
+      font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+      font-weight: 500; color: var(--muted); min-width: 1.5rem;
+    }
+    .l2-text {
+      font-size: .9375rem; font-weight: 600; color: var(--text);
+    }
+    .l2-body {
+      font-size: .875rem; color: var(--muted); line-height: 1.65;
+      padding-left: 2.15rem; margin-top: .15rem;
+    }
+
+    /* Level 3 — Numbers */
+    .l3-group { padding-left: 4.4rem; margin-top: .25rem; }
+    .l3 {
+      display: flex; align-items: baseline; gap: .5rem;
+      padding: .2rem 0;
+    }
+    .l3-num {
+      font-family: 'JetBrains Mono', monospace; font-size: .63rem;
+      color: var(--ghost); min-width: 1.2rem;
+    }
+    .l3-text {
+      font-size: .875rem; color: var(--muted); line-height: 1.6;
+    }
+
+    /* Level 4 — Bullets (rare) */
+    .l4-group { padding-left: 6rem; margin-top: .15rem; }
+    .l4 {
+      display: flex; align-items: baseline; gap: .4rem; padding: .1rem 0;
+    }
+    .l4-num {
+      color: var(--accent); font-size: .6rem; min-width: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .l4-text { font-size: .83rem; color: var(--ghost); line-height: 1.55; }
+
+    .inline-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: .6rem;
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 0 6px; border-radius: 4px; margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <header class="page-header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Outline Method</span>
+        <span class="badge badge-neutral">#02</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Training Pipeline <span class="dim">— End to End</span></h1>
+      <p class="page-subtitle">From raw text on the internet to an aligned, deployed model</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </header>
+
+  <div class="outline-body">
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">I.</span><span class="l1-text">Data Preparation<span class="l1-note">— foundation of every LLM</span></span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">Data Collection</span></div>
+        <div class="l2-body">Internet-scale corpora assembled from diverse sources.</div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Web crawls — CommonCrawl, C4, FineWeb (multi-TB scale)</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Curated books — Books3, Project Gutenberg, arXiv papers</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Code — GitHub, Stack Overflow (critical for coding ability)</span></div>
+          <div class="l3"><span class="l3-num">4.</span><span class="l3-text">Wikipedia, encyclopedias — high-density factual text</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">Data Cleaning &amp; Filtering</span></div>
+        <div class="l2-body">Quality matters more than raw volume at scale.</div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Deduplication — exact and near-duplicate removal (MinHash, suffix arrays)</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Heuristic filters — remove boilerplate, spam, low-information pages</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Language identification — keep target-language content</span></div>
+          <div class="l3"><span class="l3-num">4.</span><span class="l3-text">Safety filtering — remove CSAM, extreme content</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">C.</span><span class="l2-text">Tokenization</span></div>
+        <div class="l2-body">Text → integer token IDs for the model to consume.</div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">BPE (Byte-Pair Encoding) — used by GPT series; builds vocab by merging frequent byte pairs</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">SentencePiece / Unigram — used by LLaMA, T5; language-agnostic subword segmentation</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Vocabulary size typically 32K–128K; ~1.3 tokens per word in English</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">II.</span><span class="l1-text">Pre-Training <span class="inline-badge">most expensive</span></span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">Objective</span></div>
+        <div class="l2-body"><strong>Causal Language Modelling</strong> — predict the next token given all prior tokens. Self-supervised; no labels needed.</div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">Architecture Choices</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Decoder-only Transformer (GPT, LLaMA, Claude, Gemini) — standard for generative LLMs</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Encoder-decoder (T5, BART) — used for seq2seq tasks</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Positional encoding — RoPE or ALiBi for long-context extrapolation</span></div>
+          <div class="l3"><span class="l3-num">4.</span><span class="l3-text">Grouped Query Attention (GQA) — reduces KV-cache memory at inference</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">C.</span><span class="l2-text">Optimisation</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Optimizer: AdamW with cosine LR decay + warmup</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Mixed precision (bf16) + gradient checkpointing</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Distributed training: tensor parallelism, pipeline parallelism, ZeRO sharding</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">D.</span><span class="l2-text">Compute Scale</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Chinchilla optimal: N params × 20 = training tokens (e.g. 70B model → ~1.4T tokens)</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Frontier runs: 10²³–10²⁵ FLOP; thousands of H100/A100 GPUs for months</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Cost: $5M–$100M+ for a single frontier pre-training run</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">III.</span><span class="l1-text">Supervised Fine-Tuning (SFT)</span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">Purpose</span></div>
+        <div class="l2-body">Teaches the model to follow instructions and respond helpfully, rather than just continue text.</div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">Data Format</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Prompt-completion pairs written by human contractors or sourced from real user queries</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Instruction-following datasets: FLAN, Alpaca, ShareGPT, Dolly</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Scale: 10K–1M examples (much smaller than pre-training)</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">C.</span><span class="l2-text">Parameter-Efficient Variants</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">LoRA — train low-rank adapter matrices; freeze base model weights</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">QLoRA — LoRA on 4-bit quantized base model; fits in consumer GPU VRAM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">IV.</span><span class="l1-text">Alignment <span class="inline-badge">safety-critical</span></span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">RLHF — Reinforcement Learning from Human Feedback</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Collect human preference data: raters rank multiple model outputs</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Train a reward model (RM) on those rankings</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Fine-tune the LLM policy to maximise RM score using PPO</span></div>
+          <div class="l3"><span class="l3-num">4.</span><span class="l3-text">KL-divergence penalty keeps policy close to SFT model (prevents reward hacking)</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">DPO — Direct Preference Optimisation</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Bypasses explicit reward model; optimises policy directly from preference pairs</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Simpler, more stable training; widely adopted post-2023</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">C.</span><span class="l2-text">Constitutional AI (CAI)</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Model critiques its own outputs against a written "constitution" of principles</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Reduces need for human labelling at scale; used by Anthropic</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">V.</span><span class="l1-text">Evaluation</span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">Automated Benchmarks</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">MMLU — 57-subject multiple choice; measures breadth of world knowledge</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">HumanEval / SWE-Bench — code generation and real bug fixing</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">MATH, GSM8K — mathematical reasoning</span></div>
+          <div class="l3"><span class="l3-num">4.</span><span class="l3-text">GPQA — expert-level PhD questions in science</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">Human Evaluation</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Chatbot Arena — ELO ratings from blind pairwise comparisons</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Red-teaming — adversarial probing for safety failures</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-section">
+      <div class="l1"><span class="l1-num">VI.</span><span class="l1-text">Deployment</span></div>
+      <div class="l2-group">
+        <div class="l2"><span class="l2-num">A.</span><span class="l2-text">Serving Infrastructure</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">Inference servers: vLLM, TGI, TensorRT-LLM — PagedAttention for KV-cache efficiency</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Quantization: 8-bit, 4-bit (GPTQ, AWQ) to reduce VRAM and cost</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Speculative decoding — small draft model speeds up large model generation</span></div>
+        </div>
+        <div class="l2"><span class="l2-num">B.</span><span class="l2-text">Access Patterns</span></div>
+        <div class="l3-group">
+          <div class="l3"><span class="l3-num">1.</span><span class="l3-text">API (OpenAI, Anthropic, Google) — pay-per-token; no infrastructure management</span></div>
+          <div class="l3"><span class="l3-num">2.</span><span class="l3-text">Self-hosted open weights (Llama, Mistral) — control, privacy, cost at scale</span></div>
+          <div class="l3"><span class="l3-num">3.</span><span class="l3-text">Edge deployment — quantized small models on device (Phi-3, Gemma 2B)</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.outline-body -->
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+</script>
+</body>
+</html>

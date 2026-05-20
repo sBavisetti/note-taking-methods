@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zettelkasten — LLM Core Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#fafaf7;--surface:#ffffff;--surface-hi:#f4f4f1;
+      --border:#e4e4e7;--text:#18181b;--muted:#52525b;
+      --ghost:#a1a1aa;--accent:#0ea5e9;
+      --accent-soft:rgba(14,165,233,.08);--accent-ring:rgba(14,165,233,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.06);
+    }
+    [data-theme="dark"] {
+      --bg:#0a0a0b;--surface:#131316;--surface-hi:#1c1c20;
+      --border:#27272a;--text:#f4f4f5;--muted:#a1a1aa;
+      --ghost:#52525b;--accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.08);--accent-ring:rgba(56,189,248,.22);
+      --shadow-md:0 4px 12px rgba(0,0,0,.5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.65;min-height:100vh;padding:3rem 1.25rem 5rem;transition:background .2s ease,color .2s ease;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    strong{font-weight:600;color:var(--text)}
+
+    /* ─── Page wrapper ─── */
+    .page-wrapper { max-width: 1020px; margin: 0 auto; }
+    .page-top {
+      display:flex;justify-content:space-between;align-items:flex-start;
+      gap:1rem;flex-wrap:wrap;margin-bottom:1.75rem;
+    }
+    .badge-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+    .badge{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:9999px;border:1px solid;}
+    .badge-accent{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
+    .badge-neutral{color:var(--muted);background:transparent;border-color:var(--border)}
+    .page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.025em;color:var(--text);line-height:1.15;}
+    .page-title .dim{color:var(--ghost);font-weight:400;font-size:1.2rem}
+    .page-subtitle{font-size:.8rem;color:var(--muted);margin-top:5px}
+    .meta-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .theme-btn{width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease;}
+    .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .back-link{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s ease;}
+    .back-link:hover{color:var(--accent)}
+
+    /* ─── Zettelkasten grid ─── */
+    .zk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: .85rem;
+      align-items: start;
+    }
+
+    .zk-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: .65rem;
+      padding: 1.1rem 1.15rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      transition: box-shadow .2s ease, border-color .15s ease, transform .15s ease;
+      cursor: default;
+    }
+    [data-theme="dark"] .zk-card { box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .zk-card:hover {
+      border-color: var(--accent-ring);
+      box-shadow: 0 0 0 1px var(--accent-ring), 0 4px 12px rgba(0,0,0,.08);
+      transform: translateY(-1px);
+    }
+    [data-theme="dark"] .zk-card:hover { box-shadow: 0 0 0 1px var(--accent-ring), 0 4px 16px rgba(0,0,0,.4); }
+
+    .zk-top {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: .55rem;
+    }
+    .zk-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .63rem; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 1px 7px; border-radius: .3rem;
+    }
+    .zk-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem; color: var(--ghost);
+      border: 1px solid var(--border);
+      padding: 1px 7px; border-radius: 9999px;
+    }
+    .zk-title {
+      font-size: .9rem; font-weight: 700;
+      color: var(--text); letter-spacing: -.01em;
+      margin-bottom: .4rem; line-height: 1.3;
+    }
+    .zk-body {
+      font-size: .845rem; color: var(--muted);
+      line-height: 1.68; margin-bottom: .55rem;
+    }
+    .zk-links {
+      border-top: 1px solid var(--border);
+      padding-top: .5rem; margin-top: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem; color: var(--ghost);
+      display: flex; align-items: center; flex-wrap: wrap; gap: .3rem;
+    }
+    .zk-links span { color: var(--ghost); margin-right: .2rem; }
+    .zk-ref {
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-ring);
+      padding: 1px 6px; border-radius: .25rem;
+      transition: opacity .12s ease; cursor: pointer;
+    }
+    .zk-ref:hover { opacity: .75; }
+    .zk-formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .74rem; color: var(--accent);
+      background: var(--accent-soft); border: 1px solid var(--accent-ring);
+      padding: 3px 8px; border-radius: 4px;
+      display: block; margin: .35rem 0;
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <div class="page-top">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-accent">Zettelkasten</span>
+        <span class="badge badge-neutral">#07</span>
+        <span class="badge badge-neutral">LLM Notes</span>
+      </div>
+      <h1 class="page-title">LLM Concept Network <span class="dim">— Atomic Cards</span></h1>
+      <p class="page-subtitle">One idea per card. Every card links to related concepts. Navigate the network.</p>
+    </div>
+    <div class="meta-col">
+      <button class="theme-btn" onclick="toggleTheme()"><span id="theme-icon">☀</span></button>
+      <span class="badge badge-neutral" style="padding:3px 11px;">2026-05-19</span>
+      <a href="index.html" class="back-link">← All Methods</a>
+    </div>
+  </div>
+
+  <div class="zk-grid">
+
+    <div class="zk-card" id="Z001">
+      <div class="zk-top"><span class="zk-id">Z-001</span><span class="zk-tag">fundamentals</span></div>
+      <div class="zk-title">Token</div>
+      <div class="zk-body">The atomic unit of text for an LLM. Roughly 3–4 characters or ~¾ of a word in English. Words are split into subword tokens via BPE or SentencePiece. The model never sees individual characters — only token IDs from a fixed vocabulary of 32K–128K entries.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-002</span><span class="zk-ref">Z-010</span></div>
+    </div>
+
+    <div class="zk-card" id="Z002">
+      <div class="zk-top"><span class="zk-id">Z-002</span><span class="zk-tag">representation</span></div>
+      <div class="zk-title">Embedding</div>
+      <div class="zk-body">A dense vector (e.g., 4096 floats) that encodes the meaning of a token in a high-dimensional space. Tokens with related meanings have similar embeddings. Embeddings are learned during pre-training and are the bridge between discrete tokens and continuous neural computation.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-001</span><span class="zk-ref">Z-003</span><span class="zk-ref">Z-008</span></div>
+    </div>
+
+    <div class="zk-card" id="Z003">
+      <div class="zk-top"><span class="zk-id">Z-003</span><span class="zk-tag">mechanism</span></div>
+      <div class="zk-title">Self-Attention</div>
+      <div class="zk-body">Allows every token to "look at" every other token in the context. Computes queries, keys, and values; weights contributions by dot-product similarity scaled by √d_k.</div>
+      <span class="zk-formula">softmax( QKᵀ / √d_k ) · V</span>
+      <div class="zk-body" style="margin-bottom:0">Enables long-range dependency capture — crucial for coreference, agreement, and discourse.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-004</span><span class="zk-ref">Z-010</span></div>
+    </div>
+
+    <div class="zk-card" id="Z004">
+      <div class="zk-top"><span class="zk-id">Z-004</span><span class="zk-tag">architecture</span></div>
+      <div class="zk-title">Transformer Block</div>
+      <div class="zk-body">The repeating unit in an LLM. Each block contains: (1) multi-head self-attention, (2) add + layer norm, (3) feed-forward network (two linear layers + GELU), (4) add + layer norm. Stacked 32–96 times. Residual connections allow gradient flow through deep stacks.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-003</span><span class="zk-ref">Z-005</span></div>
+    </div>
+
+    <div class="zk-card" id="Z005">
+      <div class="zk-top"><span class="zk-id">Z-005</span><span class="zk-tag">training</span></div>
+      <div class="zk-title">Pre-Training</div>
+      <div class="zk-body">Self-supervised learning on massive text corpora by predicting the next token. No labels required. The model sees trillions of tokens and encodes statistical regularities of language, world knowledge, and reasoning patterns into its weights. The most expensive phase by far.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-006</span><span class="zk-ref">Z-011</span><span class="zk-ref">Z-012</span></div>
+    </div>
+
+    <div class="zk-card" id="Z006">
+      <div class="zk-top"><span class="zk-id">Z-006</span><span class="zk-tag">training</span></div>
+      <div class="zk-title">Fine-Tuning (SFT)</div>
+      <div class="zk-body">Continues training on a small dataset of (prompt, ideal response) pairs. Teaches the base model to follow instructions and behave as an assistant rather than just continuing text. LoRA and QLoRA make SFT feasible on single GPUs by training only small adapter matrices.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-005</span><span class="zk-ref">Z-007</span></div>
+    </div>
+
+    <div class="zk-card" id="Z007">
+      <div class="zk-top"><span class="zk-id">Z-007</span><span class="zk-tag">alignment</span></div>
+      <div class="zk-title">RLHF / DPO</div>
+      <div class="zk-body">RLHF trains a reward model on human preference rankings, then uses PPO to push the LLM policy toward outputs with higher reward. DPO (Direct Preference Optimisation) skips the reward model and optimises the policy directly from ranked pairs — simpler and more stable post-2023.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-006</span><span class="zk-ref">Z-009</span></div>
+    </div>
+
+    <div class="zk-card" id="Z008">
+      <div class="zk-top"><span class="zk-id">Z-008</span><span class="zk-tag">technique</span></div>
+      <div class="zk-title">RAG</div>
+      <div class="zk-body">Retrieval-Augmented Generation. At inference time: embed the query → retrieve top-k chunks from a vector store → inject retrieved text into the prompt as context → generate a grounded response. Keeps knowledge current without retraining. Reduces hallucination for factual queries.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-002</span><span class="zk-ref">Z-009</span><span class="zk-ref">Z-011</span></div>
+    </div>
+
+    <div class="zk-card" id="Z009">
+      <div class="zk-top"><span class="zk-id">Z-009</span><span class="zk-tag">limitation</span></div>
+      <div class="zk-title">Hallucination</div>
+      <div class="zk-body">The model generates confident but factually incorrect text. Root cause: the objective is next-token likelihood, not truth. The model interpolates from training distribution — if a plausible-sounding fact fits, it may generate it. Key mitigations: RAG, tool use, RLHF against overconfidence.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-007</span><span class="zk-ref">Z-008</span><span class="zk-ref">Z-013</span></div>
+    </div>
+
+    <div class="zk-card" id="Z010">
+      <div class="zk-top"><span class="zk-id">Z-010</span><span class="zk-tag">architecture</span></div>
+      <div class="zk-title">Context Window</div>
+      <div class="zk-body">Maximum number of tokens processed in one forward pass. Self-attention is O(n²) in memory and compute. Expanded via RoPE/ALiBi positional encodings and hardware upgrades. GPT-3: 4K → Claude 3: 200K → Gemini 1.5: 1M+. "Lost-in-the-middle" degrades retrieval in the centre of long contexts.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-001</span><span class="zk-ref">Z-003</span><span class="zk-ref">Z-008</span></div>
+    </div>
+
+    <div class="zk-card" id="Z011">
+      <div class="zk-top"><span class="zk-id">Z-011</span><span class="zk-tag">technique</span></div>
+      <div class="zk-title">Prompt Engineering</div>
+      <div class="zk-body">Crafting inputs to steer model behaviour without touching weights. Key patterns: few-shot examples, chain-of-thought ("think step by step"), role-assignment ("You are an expert..."), format constraints, negative examples. Small prompt changes can have outsized effect on output quality.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-005</span><span class="zk-ref">Z-008</span><span class="zk-ref">Z-012</span></div>
+    </div>
+
+    <div class="zk-card" id="Z012">
+      <div class="zk-top"><span class="zk-id">Z-012</span><span class="zk-tag">technique</span></div>
+      <div class="zk-title">Tool Use / Function Calling</div>
+      <div class="zk-body">The model is given a schema of callable functions and can emit structured JSON to invoke them. The host program executes the function, returns the result, and the model incorporates it into its response. Converts the LLM from a static reasoner to an active agent with access to real-world data and actions.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-009</span><span class="zk-ref">Z-011</span><span class="zk-ref">Z-013</span></div>
+    </div>
+
+    <div class="zk-card" id="Z013">
+      <div class="zk-top"><span class="zk-id">Z-013</span><span class="zk-tag">architecture</span></div>
+      <div class="zk-title">Agentic Loop</div>
+      <div class="zk-body">A design pattern: (1) Plan — break goal into steps; (2) Act — call a tool; (3) Observe — read the output; (4) Reflect — update plan; repeat until done. Requires: long context for trajectory history, reliable tool-calling, and failure recovery. Foundation for autonomous software agents.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-010</span><span class="zk-ref">Z-012</span></div>
+    </div>
+
+    <div class="zk-card" id="Z014">
+      <div class="zk-top"><span class="zk-id">Z-014</span><span class="zk-tag">inference</span></div>
+      <div class="zk-title">Sampling &amp; Temperature</div>
+      <div class="zk-body">After computing logits over vocabulary, temperature T scales them: T&lt;1 makes distribution sharper (more deterministic); T&gt;1 flattens it (more random). Top-p (nucleus) sampling then keeps only the smallest set of tokens summing to probability p before drawing. Temperature 0 = greedy argmax.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-001</span><span class="zk-ref">Z-004</span></div>
+    </div>
+
+    <div class="zk-card" id="Z015">
+      <div class="zk-top"><span class="zk-id">Z-015</span><span class="zk-tag">scaling</span></div>
+      <div class="zk-title">Scaling Laws</div>
+      <div class="zk-body">Test loss scales as a power law with compute, data, and parameters. Chinchilla (2022) showed optimal scaling requires N parameters and ~20N training tokens. Emergent abilities appear non-linearly at certain compute thresholds — model quality appears flat then suddenly jumps.</div>
+      <div class="zk-links"><span>links →</span><span class="zk-ref">Z-005</span><span class="zk-ref">Z-004</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let dark = true;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = dark ? '☀' : '☾';
+  }
+  // Clicking a zk-ref scrolls to that card and highlights it
+  document.querySelectorAll('.zk-ref').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.textContent.trim().replace('-', '');
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.transition = 'box-shadow .2s ease';
+        target.style.boxShadow = '0 0 0 2px var(--accent)';
+        setTimeout(() => target.style.boxShadow = '', 1500);
+      }
+    });
+  });
+</script>
+</body>
+</html>
