@@ -1,6 +1,6 @@
-# LLM Notes — 10 Note-Taking Methods
+# Note-Taking Methods — 10 Formats, One Topic
 
-> One topic. Ten formats. A study collection about **Large Language Models** built using every major note-taking method, styled with a clean editorial design system.
+> Ten note-taking strategies demonstrated on a single subject — **Large Language Models** — so you can compare formats side by side and pick what works for how you think.
 
 ---
 
@@ -32,8 +32,8 @@ Each page is fully self-contained, has a **light/dark theme toggle**, and follow
 ## Usage
 
 ```
-git clone https://github.com/sBavisetti/llm-notes.git
-cd llm-notes
+git clone https://github.com/sBavisetti/note-taking-methods.git
+cd note-taking-methods
 # open index.html in your browser
 ```
 
@@ -62,7 +62,7 @@ All pages share the same design tokens, mirrored from a personal website:
 ## File Structure
 
 ```
-llm-notes/
+note-taking-methods/
 ├── index.html                  ← start here
 ├── llm-01-cornell.html
 ├── llm-02-outline.html
