@@ -100,7 +100,7 @@
 
   <div class="flow-body">
     <div class="flow-diagram-wrap">
-      <svg id="flow-svg" viewBox="0 0 920 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+      <svg id="flow-svg" viewBox="0 0 920 580" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
         <defs>
           <marker id="arr" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 9 3.5, 0 7" fill-opacity=".7"/>
@@ -125,18 +125,18 @@
         <path d="M 660 155 Q 680 155 696 155" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
 
         <!-- ── DOWN connector: Output Head → Softmax ── -->
-        <path d="M 762 195 Q 762 220 762 240" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+        <path d="M 762 195 Q 762 252 762 310" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
 
         <!-- ── ROW 2: right-to-left return path ── -->
 
         <!-- Arrow 5→6: Softmax → Sampling -->
-        <path d="M 720 280 Q 700 280 680 280" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+        <path d="M 720 337 Q 700 337 680 337" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
 
         <!-- Arrow 6→7: Sampling → Generated Token -->
-        <path d="M 560 280 Q 542 280 524 280" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
+        <path d="M 560 342 Q 542 342 524 342" fill="none" stroke-width="1.5" stroke-opacity=".6" marker-end="url(#arr)"/>
 
         <!-- Arrow 7→output: Generated Token → Auto-regressive feedback -->
-        <path d="M 400 310 Q 380 360 300 370 Q 120 380 100 310 Q 90 250 95 200 Q 98 165 120 145" fill="none" stroke-width="1.5" stroke-opacity=".35" stroke-dasharray="6 4" marker-end="url(#arr-d)"/>
+        <path d="M 400 370 Q 380 420 300 430 Q 120 440 100 370 Q 90 280 95 200 Q 98 165 120 145" fill="none" stroke-width="1.5" stroke-opacity=".35" stroke-dasharray="6 4" marker-end="url(#arr-d)"/>
 
         <!-- ── SIDE annotations (dashed connections) ── -->
 
@@ -147,7 +147,7 @@
         <path d="M 575 230 L 575 198" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
 
         <!-- Temperature → Sampling -->
-        <path d="M 630 330 L 630 310" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
+        <path d="M 630 385 L 630 370" fill="none" stroke-opacity=".35" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-d)"/>
 
         <!-- ── MAIN NODES ── -->
 
@@ -192,28 +192,28 @@
           <text x="758" y="183" text-anchor="middle" font-size="9" opacity=".5">h → logits ∈ ℝ^|vocab|</text>
         </g>
 
-        <!-- Node 6: Softmax (720,250 → 100×55) -->
+        <!-- Node 6: Softmax (720,310 → 100×55) -->
         <g class="flow-node">
-          <rect x="720" y="250" width="100" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
-          <text x="770" y="273" text-anchor="middle" font-size="11" font-weight="700">Softmax</text>
-          <text x="770" y="289" text-anchor="middle" font-size="9" opacity=".65">logits → probs</text>
-          <text x="770" y="301" text-anchor="middle" font-size="8.5" opacity=".5">sum to 1.0</text>
+          <rect x="720" y="310" width="100" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="770" y="333" text-anchor="middle" font-size="11" font-weight="700">Softmax</text>
+          <text x="770" y="349" text-anchor="middle" font-size="9" opacity=".65">logits → probs</text>
+          <text x="770" y="361" text-anchor="middle" font-size="8.5" opacity=".5">sum to 1.0</text>
         </g>
 
-        <!-- Node 7: Sampling (560,255 → 120×55) -->
+        <!-- Node 7: Sampling (560,315 → 120×55) -->
         <g class="flow-node">
-          <rect x="560" y="255" width="120" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
-          <text x="620" y="278" text-anchor="middle" font-size="11" font-weight="700">Sampling</text>
-          <text x="620" y="294" text-anchor="middle" font-size="9" opacity=".65">temp · top-p</text>
-          <text x="620" y="306" text-anchor="middle" font-size="8.5" opacity=".5">→ token selected</text>
+          <rect x="560" y="315" width="120" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="620" y="338" text-anchor="middle" font-size="11" font-weight="700">Sampling</text>
+          <text x="620" y="354" text-anchor="middle" font-size="9" opacity=".65">temp · top-p</text>
+          <text x="620" y="366" text-anchor="middle" font-size="8.5" opacity=".5">→ token selected</text>
         </g>
 
-        <!-- Node 8: Generated Token (390,255 → 130×55) -->
+        <!-- Node 8: Generated Token (390,315 → 130×55) -->
         <g class="flow-node">
-          <rect x="390" y="255" width="130" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
-          <text x="455" y="278" text-anchor="middle" font-size="11" font-weight="700">Generated Token</text>
-          <text x="455" y="294" text-anchor="middle" font-size="9" opacity=".65">appended to sequence</text>
-          <text x="455" y="306" text-anchor="middle" font-size="8.5" opacity=".5">loop until &lt;eos&gt;</text>
+          <rect x="390" y="315" width="130" height="55" rx="8" fill-opacity=".92" stroke-width="1.5"/>
+          <text x="455" y="338" text-anchor="middle" font-size="11" font-weight="700">Generated Token</text>
+          <text x="455" y="354" text-anchor="middle" font-size="9" opacity=".65">appended to sequence</text>
+          <text x="455" y="366" text-anchor="middle" font-size="8.5" opacity=".5">loop until &lt;eos&gt;</text>
         </g>
 
         <!-- ── SIDE NOTE NODES (dashed borders) ── -->
@@ -234,17 +234,17 @@
 
         <!-- Temperature note -->
         <g class="side-node flow-node">
-          <rect x="570" y="318" width="120" height="40" rx="7" fill-opacity=".5" stroke-width="1"/>
-          <text x="630" y="334" text-anchor="middle" font-size="9.5" font-weight="600">Temperature T</text>
-          <text x="630" y="350" text-anchor="middle" font-size="8.5" opacity=".6">0 = greedy · 1 = standard</text>
+          <rect x="570" y="385" width="120" height="40" rx="7" fill-opacity=".5" stroke-width="1"/>
+          <text x="630" y="401" text-anchor="middle" font-size="9.5" font-weight="600">Temperature T</text>
+          <text x="630" y="417" text-anchor="middle" font-size="8.5" opacity=".6">0 = greedy · 1 = standard</text>
         </g>
 
         <!-- Auto-regressive label on feedback arrow -->
-        <text x="55" y="372" font-size="8.5" opacity=".45" font-style="italic">auto-regressive loop</text>
+        <text x="55" y="445" font-size="8.5" opacity=".45" font-style="italic">auto-regressive loop</text>
 
         <!-- Row labels -->
         <text x="10" y="52" font-size="8" font-weight="600" letter-spacing=".08em" text-transform="uppercase" opacity=".4">FORWARD PASS</text>
-        <text x="390" y="245" font-size="8" font-weight="600" letter-spacing=".08em" opacity=".4">DECODE</text>
+        <text x="390" y="305" font-size="8" font-weight="600" letter-spacing=".08em" opacity=".4">DECODE</text>
 
       </svg>
     </div>

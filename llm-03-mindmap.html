@@ -96,103 +96,103 @@
         <!-- ── Connecting lines (drawn first, covered by nodes) ── -->
         <g id="lines" stroke-width="1.5" fill="none">
           <line x1="450" y1="238" x2="450" y2="124" opacity=".35"/><!-- Architecture -->
-          <line x1="450" y1="246" x2="541" y2="187" opacity=".35"/><!-- Concepts -->
-          <line x1="492" y1="280" x2="605" y2="280" opacity=".35"/><!-- Models -->
-          <line x1="450" y1="314" x2="541" y2="373" opacity=".35"/><!-- Applications -->
+          <line x1="450" y1="246" x2="532" y2="187" opacity=".35"/><!-- Concepts -->
+          <line x1="492" y1="280" x2="596" y2="280" opacity=".35"/><!-- Models -->
+          <line x1="450" y1="314" x2="532" y2="373" opacity=".35"/><!-- Applications -->
           <line x1="450" y1="322" x2="450" y2="436" opacity=".35"/><!-- Deployment -->
-          <line x1="450" y1="314" x2="359" y2="373" opacity=".35"/><!-- Limitations -->
-          <line x1="408" y1="280" x2="295" y2="280" opacity=".35"/><!-- Training -->
-          <line x1="450" y1="246" x2="359" y2="187" opacity=".35"/><!-- Techniques -->
+          <line x1="450" y1="314" x2="368" y2="373" opacity=".35"/><!-- Limitations -->
+          <line x1="408" y1="280" x2="304" y2="280" opacity=".35"/><!-- Training -->
+          <line x1="450" y1="246" x2="368" y2="187" opacity=".35"/><!-- Techniques -->
         </g>
 
         <!-- ── Branch boxes (drawn over lines) ── -->
 
-        <!-- Architecture (top) cx=450, cy=82 → box 395,40 w=110 h=84 -->
+        <!-- Architecture (top) cx=450, cy=82 → box 386,40 w=128 h=84 -->
         <g class="node-box">
-          <rect x="395" y="40" width="110" height="84" rx="8"
+          <rect x="386" y="40" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="403" y1="60" x2="497" y2="60" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="394" y1="60" x2="506" y2="60" stroke="var(--border)" stroke-width=".5"/>
           <text x="450" y="55" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Architecture</text>
-          <text x="405" y="74" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Transformer layers</text>
-          <text x="405" y="89" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-attention heads</text>
-          <text x="405" y="104" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Feed-forward network</text>
+          <text x="396" y="74" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Transformer layers</text>
+          <text x="396" y="89" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-attention heads</text>
+          <text x="396" y="104" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Feed-forward network</text>
         </g>
 
-        <!-- Concepts (top-right) cx=596, cy=145 → box 541,103 -->
+        <!-- Concepts (top-right) cx=596, cy=145 → box 532,103 w=128 -->
         <g class="node-box">
-          <rect x="541" y="103" width="110" height="84" rx="8"
+          <rect x="532" y="103" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="549" y1="123" x2="643" y2="123" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="540" y1="123" x2="652" y2="123" stroke="var(--border)" stroke-width=".5"/>
           <text x="596" y="118" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Concepts</text>
-          <text x="551" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Tokens &amp; vocabulary</text>
-          <text x="551" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Embeddings</text>
-          <text x="551" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Context window</text>
+          <text x="542" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Tokens &amp; vocabulary</text>
+          <text x="542" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Embeddings</text>
+          <text x="542" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Context window</text>
         </g>
 
-        <!-- Models (right) cx=660, cy=280 → box 605,238 -->
+        <!-- Models (right) cx=660, cy=280 → box 596,238 w=128 -->
         <g class="node-box">
-          <rect x="605" y="238" width="110" height="84" rx="8"
+          <rect x="596" y="238" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="613" y1="258" x2="707" y2="258" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="604" y1="258" x2="716" y2="258" stroke="var(--border)" stroke-width=".5"/>
           <text x="660" y="253" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Models</text>
-          <text x="615" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ GPT-4o / o3</text>
-          <text x="615" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Claude / Gemini</text>
-          <text x="615" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Llama / Mistral</text>
+          <text x="606" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ GPT-4o / o3</text>
+          <text x="606" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Claude / Gemini</text>
+          <text x="606" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Llama / Mistral</text>
         </g>
 
-        <!-- Applications (bottom-right) cx=596, cy=415 → box 541,373 -->
+        <!-- Applications (bottom-right) cx=596, cy=415 → box 532,373 w=128 -->
         <g class="node-box">
-          <rect x="541" y="373" width="110" height="84" rx="8"
+          <rect x="532" y="373" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="549" y1="393" x2="643" y2="393" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="540" y1="393" x2="652" y2="393" stroke="var(--border)" stroke-width=".5"/>
           <text x="596" y="388" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Applications</text>
-          <text x="551" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Coding assistants</text>
-          <text x="551" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Document analysis</text>
-          <text x="551" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Search &amp; RAG</text>
+          <text x="542" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Coding assistants</text>
+          <text x="542" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Document analysis</text>
+          <text x="542" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Search &amp; RAG</text>
         </g>
 
-        <!-- Deployment (bottom) cx=450, cy=478 → box 395,436 -->
+        <!-- Deployment (bottom) cx=450, cy=478 → box 386,436 w=128 -->
         <g class="node-box">
-          <rect x="395" y="436" width="110" height="84" rx="8"
+          <rect x="386" y="436" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="403" y1="456" x2="497" y2="456" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="394" y1="456" x2="506" y2="456" stroke="var(--border)" stroke-width=".5"/>
           <text x="450" y="451" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Deployment</text>
-          <text x="405" y="470" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Cloud API</text>
-          <text x="405" y="485" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-hosted</text>
-          <text x="405" y="500" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Edge / on-device</text>
+          <text x="396" y="470" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Cloud API</text>
+          <text x="396" y="485" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Self-hosted</text>
+          <text x="396" y="500" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Edge / on-device</text>
         </g>
 
-        <!-- Limitations (bottom-left) cx=304, cy=415 → box 249,373 -->
+        <!-- Limitations (bottom-left) cx=304, cy=415 → box 240,373 w=128 -->
         <g class="node-box">
-          <rect x="249" y="373" width="110" height="84" rx="8"
+          <rect x="240" y="373" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="257" y1="393" x2="351" y2="393" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="248" y1="393" x2="360" y2="393" stroke="var(--border)" stroke-width=".5"/>
           <text x="304" y="388" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Limitations</text>
-          <text x="259" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Hallucination</text>
-          <text x="259" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Knowledge cutoff</text>
-          <text x="259" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Bias &amp; cost</text>
+          <text x="250" y="407" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Hallucination</text>
+          <text x="250" y="422" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Knowledge cutoff</text>
+          <text x="250" y="437" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Bias &amp; cost</text>
         </g>
 
-        <!-- Training (left) cx=240, cy=280 → box 185,238 -->
+        <!-- Training (left) cx=240, cy=280 → box 176,238 w=128 -->
         <g class="node-box">
-          <rect x="185" y="238" width="110" height="84" rx="8"
+          <rect x="176" y="238" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="193" y1="258" x2="287" y2="258" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="184" y1="258" x2="296" y2="258" stroke="var(--border)" stroke-width=".5"/>
           <text x="240" y="253" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Training</text>
-          <text x="195" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Pre-training</text>
-          <text x="195" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Fine-tuning (SFT)</text>
-          <text x="195" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ RLHF / DPO</text>
+          <text x="186" y="272" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Pre-training</text>
+          <text x="186" y="287" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Fine-tuning (SFT)</text>
+          <text x="186" y="302" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ RLHF / DPO</text>
         </g>
 
-        <!-- Techniques (top-left) cx=304, cy=145 → box 249,103 -->
+        <!-- Techniques (top-left) cx=304, cy=145 → box 240,103 w=128 -->
         <g class="node-box">
-          <rect x="249" y="103" width="110" height="84" rx="8"
+          <rect x="240" y="103" width="128" height="84" rx="8"
             fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5" opacity=".95"/>
-          <line x1="257" y1="123" x2="351" y2="123" stroke="var(--border)" stroke-width=".5"/>
+          <line x1="248" y1="123" x2="360" y2="123" stroke="var(--border)" stroke-width=".5"/>
           <text x="304" y="118" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="var(--accent)">Techniques</text>
-          <text x="259" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Prompt engineering</text>
-          <text x="259" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Chain-of-thought</text>
-          <text x="259" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Agentic loops</text>
+          <text x="250" y="137" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Prompt engineering</text>
+          <text x="250" y="152" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Chain-of-thought</text>
+          <text x="250" y="167" font-family="Inter" font-size="9.5" fill="var(--muted)">▸ Agentic loops</text>
         </g>
 
         <!-- ── Centre hub (drawn last so it's on top) ── -->
